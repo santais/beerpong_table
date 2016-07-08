@@ -37,7 +37,19 @@ int PCA9685Setup(const uint8_t i2cAddress, uint16_t freq)
  */
 void PCA9685Reset()
 {
+    // Restart the PCA9685
+#ifdef RPI
+    int mode1 = wiringPiI2CReadReg8(m_fd, MODE1) & MODE1_RESTART_MASK;
 
+    if(mode1)
+    {
+        int settings = mode & MODE1_WAKE_MASK;      // Clear SLEEP bit
+        wiringPiI2CReadReg8(m_fd, MODE1, settings);
+        usleep(500);                                // Sleep for 500 microseconds
+        settings |= MODE1_RESTART_MASK;
+        wiringPiI2CReadReg8(m_fd, MODE1, settings);
+    }
+#endif
 }
 
 /**
@@ -45,7 +57,7 @@ void PCA9685Reset()
  *
  * @param freq  Frequency to be set. Range 24 - 1526 Hz
  */
-void PCA9685SetFreq(uint16_t freq)
+uint16_t PCA9685SetFreq(uint16_t freq)
 {
     uint16_t frequency = 0;
 
@@ -78,6 +90,7 @@ void PCA9685SetFreq(uint16_t freq)
     usleep(500);
     wiringPiI2CWriteReg8(m_fd, MODE1, restart);
 #endif
+    return prescale;
 }
 
 /**

@@ -50,7 +50,7 @@
 #define MODE1_RESTART_MASK      0x80
 #define MODE1_SETUP_MASK        0x7F
 
-#define LED_FULL_ON_OFF_MASK   0x10
+#define LED_FULL_ON_OFF_MASK    0x10
 #define LED_FULL_NEGATED        0xEF
 
 #define LED_H_SHIFT_MASK        8
@@ -75,8 +75,10 @@ void PCA9685Reset();
  * @brief Set the frequency of the PCA9685
  *
  * @param freq  Frequency to be set. Range 24 - 1526 Hz
+ *
+ * @return Prescale value
  */
-void PCA9685SetFreq(uint16_t freq);
+uint16_t PCA9685SetFreq(uint16_t freq);
 
 /**
  * @brief Set the PWM Duty Cycle of a specific pin
