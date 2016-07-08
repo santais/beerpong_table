@@ -7,15 +7,19 @@
 /*												 */
 /*												 */
 /*************************************************/
-
+#ifndef _PCA9685RPI_H_
+#define _PCA9685RPI_H_
 
 //#include <iostream>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <math.h>
 
-//#include <wiringPi.h>
-//#include <wiringPiI2C.h>
+#ifdef RPI
+#include <wiringPi.h>
+#include <wiringPiI2C.h>
+#endif
 
 /******* Register Addresses ********/
 #define MODE1           0x00
@@ -132,3 +136,4 @@ void PCA9685AllLEDsOff();
 int getFileDescriptor();
 
  
+#endif /* _PCA9685RPI_H_ */

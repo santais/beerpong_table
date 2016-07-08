@@ -15,8 +15,8 @@ int m_fd;
 int PCA9685Setup(const uint8_t i2cAddress, uint16_t freq)
 {
     // Setup the I2C Port
+#ifdef RPI
     m_fd = wiringPiI2CSetup(i2cAddress);
-
     // Read current settings and clear restart bit
     int settings = wiringPiI2CReadReg8(m_fd, MODE1) & MODE1_SETUP_MASK;
     // Enable auto increment
@@ -27,7 +27,7 @@ int PCA9685Setup(const uint8_t i2cAddress, uint16_t freq)
 
     // Settup the frequency
     PCA9685SetFreq(freq);
-
+#endif
 
     return m_fd;
 }
@@ -60,6 +60,7 @@ void PCA9685SetFreq(uint16_t freq)
 
     uint16_t prescale = round(CLOCK_FREQ / (FREQ_RESOLUTION * frequency)) - 1;
 
+#ifdef RPI
     // Set the settings byte
     int settings = wiringPiI2CReadReg8(m_fd, MODE1) & MODE1_SETUP_MASK;
     int sleep = settings | MODE1_SLEEP_MASK;        // Set bit 5 SLEEP
@@ -74,8 +75,9 @@ void PCA9685SetFreq(uint16_t freq)
     wiringPiI2CWriteReg8(m_fd, MODE1, wake);
 
     // Wait 1ms to for oscillator to stabilize and then restart it
-    delay(1);
+    usleep(500);
     wiringPiI2CWriteReg8(m_fd, MODE1, restart);
+#endif
 }
 
 /**
@@ -112,7 +114,7 @@ void PCA9685SetPWM(uint8_t LEDPin, uint16_t onTime, uint16_t offTime)
     if(LEDPin < 16)
     {
         uint8_t LEDRegister = LED0_ON_L + (LED_NEXT_MASK * LEDPin);
-
+#ifdef RPI
         // Calculate the on and off time and write to the registers
         uint8_t LEDRegisterVal = onTime & LED_L_MASK;               // LED_ON_L
         wiringPiI2CWriteReg8(m_fd, LEDRegister, LEDRegisterVal);
@@ -123,6 +125,7 @@ void PCA9685SetPWM(uint8_t LEDPin, uint16_t onTime, uint16_t offTime)
         wiringPiI2CWriteReg8(m_fd, LEDRegister + 2, LEDRegisterVal);
         LEDRegisterVal = offTime & LED_H_SHIFT_MASK;                // LED_OFF_H
         wiringPiI2CWriteReg8(m_fd, LEDRegister + 3, LEDRegisterVal);
+#endif
     }
 }
 
@@ -137,7 +140,7 @@ uint16_t PCA9685GetPWM(uint8_t LEDPin)
 {
     uint8_t LEDRegister = LED0_ON_L + (LED_NEXT_MASK * LEDPin);
     uint16_t pwmValue = 0;
-
+#ifdef RPI
     // First retriev LED_ON_H
     uint8_t registerValue = wiringPiI2CReadReg8(m_fd, LEDRegister + 1);
     pwmValue = registerValue & 0xF;         // Only get the 3. byte
@@ -146,6 +149,7 @@ uint16_t PCA9685GetPWM(uint8_t LEDPin)
     // Retrieve LED_ON_L
     registerValue = wiringPiI2CReadReg8(m_fd, LEDRegister);
     pwmValue |= registerValue;
+#endif
 
     return pwmValue;
 }
@@ -160,7 +164,7 @@ void PCA9685LEDOn(uint8_t LEDPin)
     if(LEDPin < 16)
     {
         uint8_t LEDRegister = LED0_ON_L + (LED_NEXT_MASK * LEDPin);
-
+#ifdef RPI
         // Read current settings from LED_ON_H
         int settings = wiringPiI2CReadReg8(m_fd, LEDRegister + 1);
         settings |= LED_FULL_ON_OFF_MASK;       // Set full ON mask
@@ -172,6 +176,7 @@ void PCA9685LEDOn(uint8_t LEDPin)
         settings = wiringPiI2CReadReg8(m_fd, LEDRegister + 3);
         settings &= LED_FULL_NEGATED;
         wiringPiI2CWriteReg8(m_fd, LEDRegister, settings);
+#endif
     }
 }
 
@@ -185,13 +190,14 @@ void PCA9685LEDOff(uint8_t LEDPin)
     if(LEDPin < 16)
     {
         uint8_t LEDRegister = LED0_ON_L + (LED_NEXT_MASK * LEDPin);
-
+#ifdef PRPI
         // Read current settings from LED_OFF_H
         int settings = wiringPiI2CReadReg8(m_fd, LEDRegister + 3);
         settings |= LED_FULL_ON_OFF_MASK;
 
         // Write to register
         wiringPiI2CWriteReg8(m_fd, LEDRegister, settings);
+#endif
     }
 }
 
@@ -200,12 +206,14 @@ void PCA9685LEDOff(uint8_t LEDPin)
  */
 void PCA9685AllLEDsOn()
 {
+#ifdef RPI
     // Read current settings
     int settings = wiringPiI2CReadReg8(m_fd, ALL_LED_ON_H);
     settings |= LED_FULL_ON_OFF_MASK;
 
     // Write to register
-    wiringPiI2CWriteReg8(m_fd, LEDRegister, settings);
+    wiringPiI2CWriteReg8(m_fd, ALL_LED_ON_H, settings);
+#endif
 }
 
 /**
@@ -213,12 +221,14 @@ void PCA9685AllLEDsOn()
  */
 void PCA9685AllLEDsOff()
 {
+#ifdef RPI
     // Read current settings
     int settings = wiringPiI2CReadReg8(m_fd, ALL_LED_OFF_H);
     settings |= LED_FULL_ON_OFF_MASK;
 
     // Write to register
-    wiringPiI2CWriteReg8(m_fd, LEDRegister, settings);
+    wiringPiI2CWriteReg8(m_fd, ALL_LED_OFF_H, settings);
+#endif
 }
 
 /**
