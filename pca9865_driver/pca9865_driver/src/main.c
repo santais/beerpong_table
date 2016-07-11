@@ -175,7 +175,20 @@ int main(int argc, char *argv[])
 
     // Setup the PCA9685
     // Default Address 0x40 and frequency 500
-    PCA9685Setup(0x40, 500);
+    if(argc == 2)
+    {
+        printf("I2C Address is: %i\n", atoi(argv[1]));
+        PCA9685Setup(atoi(argv[1]), 500);
+    }
+    else if(argc == 3)
+    {
+        printf("I2C Address is: %i and frequency: %i\n", atoi(argv[1]), atoi(argv[2]));
+        PCA9685Setup(atoi(argv[1]), atoi(argv[2]));
+    }
+    else
+    {
+        PCA9685Setup(1000, 500);
+    }
 
     for(;;)
     {
