@@ -138,6 +138,28 @@ void reset()
     printf("=====================================\n");
 }
 
+void displayPCA9685Struct()
+{
+    printf("\n=====================================\n");
+    PCA9685* pca9685 = getActivePCA9685Struct();
+
+    if(pca9685 != NULL)
+    {
+        printf("I2C Address: %i\n", pca9685->i2cAddress);
+        printf("Frequency: %i\n", pca9685->frequency);
+        printf("File Descriptor: %i\n", pca9685->fileDescriptor);
+
+        // Print pins and values
+        PinOutputList* current = pca9685->pinOutputList;
+        while(current != NULL)
+        {
+            printf("LED Pin %i is value of %i\n", current->pinOutput.pin, current->pinOutput.value);
+            current = current->next;
+        }
+    }
+    printf("=====================================\n");
+}
+
 int main(int argc, char *argv[])
 {
     // Clear printf buffer immediately
@@ -151,10 +173,15 @@ int main(int argc, char *argv[])
     printf("This is x86!\n");
 #endif
 
+    // Setup the PCA9685
+    // Default Address 0x40 and frequency 500
+    PCA9685Setup(0x40, 500);
+
     for(;;)
     {
         printf("Please select either of the following functions: \n");
-        printf("1: Set PWM  2: Get PWM  3: Set LED Full ON  4: Set LED Full OFF  5: Set All LEDs Full ON  6: Set All LEDs Full Off  7: Set Frequency  8: Reset\n");
+        printf("1: Set PWM  2: Get PWM  3: Set LED Full ON  4: Set LED Full OFF  5: Set All LEDs Full ON  6: Set All LEDs Full Off  7: Set Frequency  8: Reset"
+               "  9: Get FD  A: Get PCA9685 Module\n");
         printf("Type input: ");
         fgets(inputChar, MAX_CHAR_SIZE, stdin);
         printf("\n");
@@ -191,6 +218,14 @@ int main(int argc, char *argv[])
 
         case '8':
             reset();
+            break;
+
+        case '9':
+            printf("File Descriptor value is: %i\n", getActivePCA9685Struct()->fileDescriptor);
+            break;
+
+        case 'A':
+            displayPCA9685Struct();
             break;
 
         default:

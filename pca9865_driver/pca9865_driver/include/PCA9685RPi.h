@@ -57,12 +57,73 @@
 #define LED_L_MASK              0xFF
 #define LED_NEXT_MASK           4
 
+/******** PCA Structures  *********/
+
+typedef struct
+{
+    // Associated Output pin on the RPI
+    uint8_t pin;
+
+    // 4096 ON Value
+    uint16_t value;
+} PinOutput;
+
+typedef struct PinOutputList
+{
+    struct PinOutputList* next;
+
+    PinOutput pinOutput;
+} PinOutputList;
+
+/**
+  * Linked list of all RGB LED ouptuts
+  */
+typedef struct RBGLEDOutput
+{
+    // Linked List. Next type
+    struct RGBLEDOutput *next;
+
+    // Red LED
+    PinOutput red;
+
+    // Green LED
+    PinOutput green;
+
+    // Blue LED
+    PinOutput blue;
+
+} RGBLEDOutput;
+
+/**
+  * Linked list of all PCA9685
+  */
+typedef struct PCA9685
+{
+    // Linked list. Next In list
+    struct PCA9685* next;
+
+    // I2C Address of the PCA9685 module
+    uint8_t i2cAddress;
+
+    // File Descriptor of the open device on Linux
+    int fileDescriptor;
+
+    // Frequency of the given PCA9685
+    uint16_t frequency;
+
+    // Attached RGBLED outputs.
+    PinOutputList* pinOutputList;
+
+} PCA9685;
+
+
 /**
  * @brief Setup the PCA9865
  *
  * @param i2cAddress    Hex Address of te I2C connection
  * @param frequency     Frequency of the PCA9865
- * @return
+ *
+ * @return fileDescriptor
  */
 int PCA9685Setup(const uint8_t i2cAddress, uint16_t freq);
 
@@ -131,11 +192,10 @@ void PCA9685AllLEDsOn();
 void PCA9685AllLEDsOff();
 
 /**
- * @brief Get the file descriptor for the I2C port
+ * @brief Get the active PCA9685 module;
  *
  * @return
  */
-int getFileDescriptor();
-
+PCA9685* getActivePCA9685Struct();
  
 #endif /* _PCA9685RPI_H_ */

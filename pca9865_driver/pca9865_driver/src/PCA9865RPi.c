@@ -3,33 +3,136 @@
 /****************************/
 /*    Private Variables     */
 /****************************/
-int m_fd;
+static PCA9685* m_activePCA9685 = NULL;
+
+
+/****************************/
+/*    Private Functions     */
+/****************************/
+
+/**
+ * @brief Check if the pin has been initialized
+ *
+ * @param pin       Pin to check
+ *
+ * @return found pin
+ */
+PinOutput* findPin(PinOutput **head, uint8_t pin)
+{
+    if(m_activePCA9685 != NULL)
+    {
+        PinOutputList* current = *head;
+
+        while(current != NULL)
+        {
+            if(current->pinOutput.pin == pin)
+            {
+                printf("Found pin: %i\n", current->pinOutput.pin);
+                return &current->pinOutput;
+            }
+            current = current->next;
+        }
+    }
+    else
+    {
+        return NULL;
+    }
+
+    return NULL;
+}
+
+/**
+ * @brief insertNewPin
+ *
+ * @param pin
+ *
+ * @param value
+ */
+void insertNewPin(PinOutputList **head, uint8_t pin, uint16_t value)
+{
+    PinOutputList* newNode = (PinOutputList*) malloc(sizeof(PinOutputList));
+    PinOutputList* last = *head;
+
+    if(!newNode)
+    {
+        printf("Failed to allocate memory for new Pin Node\n");
+    }
+    else
+    {
+        // Insert the data
+        newNode->next = NULL;
+        newNode->pinOutput.pin = pin;
+        newNode->pinOutput.value = value;
+
+        if(*head == NULL)
+        {
+            *head = newNode;
+            return;
+        }
+
+        while(last->next != NULL)
+        {
+            last = last->next;
+        }
+
+        last->next = newNode;
+    }
+}
+
+
+void insertNewPinValue(PinOutput **head, uint8_t LEDPin, uint16_t onTime)
+{
+    // Insert the new value into the current PCA9686;
+    PinOutput* pin = findPin(&m_activePCA9685->pinOutputList, LEDPin);
+    if(pin == NULL)
+    {
+        insertNewPin(&m_activePCA9685->pinOutputList, LEDPin, onTime);
+    }
+    else
+    {
+        pin->value = onTime;
+    }
+}
 
 /**
  * @brief Setup the PCA9865
  *
  * @param i2cAddress    Hex Address of te I2C connection
  * @param frequency     Frequency of the PCA9865
- * @return
+ *
+ * @return fileDescriptor
  */
 int PCA9685Setup(const uint8_t i2cAddress, uint16_t freq)
 {
+    // Setup the PCA9685 struct if its null
+    if(m_activePCA9685 == NULL)
+    {
+        // Assign memory to the structure
+        m_activePCA9685 = malloc(sizeof(PCA9685));
+        m_activePCA9685->next = NULL;
+        m_activePCA9685->pinOutputList = NULL;
+    }
+
+    m_activePCA9685->frequency = freq;
+    m_activePCA9685->i2cAddress = i2cAddress;
+    m_activePCA9685->pinOutputList = NULL;
+
     // Setup the I2C Port
 #ifdef RPI
-    m_fd = wiringPiI2CSetup(i2cAddress);
+    m_activePCA9685->fileDescriptor = wiringPiI2CSetup(m_activePCA9685->i2cAddress);
     // Read current settings and clear restart bit
-    int settings = wiringPiI2CReadReg8(m_fd, MODE1) & MODE1_SETUP_MASK;
+    int settings = wiringPiI2CReadReg8(m_activePCA9685->fileDescriptor, MODE1) & MODE1_SETUP_MASK;
     // Enable auto increment
     settings |= MODE1_AR_MASK;
 
     // Write to the register
-    wiringPiI2CWriteReg8(m_fd, MODE1, settings);
+    wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, MODE1, settings);
 
     // Settup the frequency
-    PCA9685SetFreq(freq);
+    PCA9685SetFreq(m_activePCA9685->frequency);
 #endif
 
-    return m_fd;
+    return m_activePCA9685->fileDescriptor;
 }
 
 /**
@@ -39,15 +142,15 @@ void PCA9685Reset()
 {
     // Restart the PCA9685
 #ifdef RPI
-    int mode1 = wiringPiI2CReadReg8(m_fd, MODE1) & MODE1_RESTART_MASK;
+    int mode1 = wiringPiI2CReadReg8(m_activePCA9685->fileDescriptor, MODE1) & MODE1_RESTART_MASK;
 
     if(mode1)
     {
         int settings = mode & MODE1_WAKE_MASK;      // Clear SLEEP bit
-        wiringPiI2CReadReg8(m_fd, MODE1, settings);
+        wiringPiI2CReadReg8(m_activePCA9685->fileDescriptor, MODE1, settings);
         usleep(500);                                // Sleep for 500 microseconds
         settings |= MODE1_RESTART_MASK;
-        wiringPiI2CReadReg8(m_fd, MODE1, settings);
+        wiringPiI2CReadReg8(m_activePCA9685->fileDescriptor, MODE1, settings);
     }
 #endif
 }
@@ -59,36 +162,35 @@ void PCA9685Reset()
  */
 uint16_t PCA9685SetFreq(uint16_t freq)
 {
-    uint16_t frequency = 0;
-
     if(freq > FREQ_RESOLUTION)
     {
-        frequency = FREQ_RESOLUTION;
+        m_activePCA9685->frequency = FREQ_RESOLUTION;
     }
     else
     {
-        frequency = freq;
+        m_activePCA9685->frequency = freq;
+
     }
 
-    uint16_t prescale = round(CLOCK_FREQ / (FREQ_RESOLUTION * frequency)) - 1;
+    uint16_t prescale = round(CLOCK_FREQ / (FREQ_RESOLUTION * m_activePCA9685->frequency )) - 1;
 
 #ifdef RPI
     // Set the settings byte
-    int settings = wiringPiI2CReadReg8(m_fd, MODE1) & MODE1_SETUP_MASK;
+    int settings = wiringPiI2CReadReg8(m_activePCA9685->fileDescriptor, MODE1) & MODE1_SETUP_MASK;
     int sleep = settings | MODE1_SLEEP_MASK;        // Set bit 5 SLEEP
     int wake  = settings & MODE1_WAKE_MASK;         // Clear bit 5 SLEEP
     int restart = settings | MODE1_RESTART_MASK;    // Set bit 7 RESTART
 
     // Set device to sleep
-    wiringPiI2CWriteReg8(m_fd, MODE1, sleep);
+    wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, MODE1, sleep);
     // Set PWM
-    wiringPiI2CWriteReg8(m_fd, PRE_SCALE, prescale);
+    wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, PRE_SCALE, prescale);
     // Wake up the PCA9685
-    wiringPiI2CWriteReg8(m_fd, MODE1, wake);
+    wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, MODE1, wake);
 
     // Wait 1ms to for oscillator to stabilize and then restart it
     usleep(500);
-    wiringPiI2CWriteReg8(m_fd, MODE1, restart);
+    wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, MODE1, restart);
 #endif
     return prescale;
 }
@@ -130,15 +232,22 @@ void PCA9685SetPWM(uint8_t LEDPin, uint16_t onTime, uint16_t offTime)
 #ifdef RPI
         // Calculate the on and off time and write to the registers
         uint8_t LEDRegisterVal = onTime & LED_L_MASK;               // LED_ON_L
-        wiringPiI2CWriteReg8(m_fd, LEDRegister, LEDRegisterVal);
+        wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, LEDRegister, LEDRegisterVal);
         LEDRegisterVal = onTime >> LED_H_SHIFT_MASK;                // LED_ON_H
-        wiringPiI2CWriteReg8(m_fd, LEDRegister + 1, LEDRegisterVal);
+        wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, LEDRegister + 1, LEDRegisterVal);
 
         LEDRegisterVal = offTime & LED_L_MASK;                      // LED_OFF_L
-        wiringPiI2CWriteReg8(m_fd, LEDRegister + 2, LEDRegisterVal);
+        wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, LEDRegister + 2, LEDRegisterVal);
         LEDRegisterVal = offTime & LED_H_SHIFT_MASK;                // LED_OFF_H
-        wiringPiI2CWriteReg8(m_fd, LEDRegister + 3, LEDRegisterVal);
+        wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, LEDRegister + 3, LEDRegisterVal);
 #endif
+
+        // Insert the new value into the current PCA9686;
+        insertNewPinValue(&m_activePCA9685->pinOutputList, LEDPin, onTime);
+    }
+    else
+    {
+        printf("ERROR. LEDPin is above maximum of 15\n");
     }
 }
 
@@ -151,19 +260,25 @@ void PCA9685SetPWM(uint8_t LEDPin, uint16_t onTime, uint16_t offTime)
  */
 uint16_t PCA9685GetPWM(uint8_t LEDPin)
 {
-    uint8_t LEDRegister = LED0_ON_L + (LED_NEXT_MASK * LEDPin);
     uint16_t pwmValue = 0;
+    if(LEDPin < 16)
+    {
+        uint8_t LEDRegister = LED0_ON_L + (LED_NEXT_MASK * LEDPin);
 #ifdef RPI
-    // First retriev LED_ON_H
-    uint8_t registerValue = wiringPiI2CReadReg8(m_fd, LEDRegister + 1);
-    pwmValue = registerValue & 0xF;         // Only get the 3. byte
-    pwmValue <<= LED_H_SHIFT_MASK;          // Shift 8 bytes to make room for LED_ON_L
+        // First retriev LED_ON_H
+        uint8_t registerValue = wiringPiI2CReadReg8(m_activePCA9685->fileDescriptor, LEDRegister + 1);
+        pwmValue = registerValue & 0xF;         // Only get the 3. byte
+        pwmValue <<= LED_H_SHIFT_MASK;          // Shift 8 bytes to make room for LED_ON_L
 
-    // Retrieve LED_ON_L
-    registerValue = wiringPiI2CReadReg8(m_fd, LEDRegister);
-    pwmValue |= registerValue;
+        // Retrieve LED_ON_L
+        registerValue = wiringPiI2CReadReg8(m_activePCA9685->fileDescriptor, LEDRegister);
+        pwmValue |= registerValue;
 #endif
-
+    }
+    else
+    {
+        printf("ERROR. LEDPin is above maximum of 15\n");
+    }
     return pwmValue;
 }
 
@@ -179,17 +294,24 @@ void PCA9685LEDOn(uint8_t LEDPin)
         uint8_t LEDRegister = LED0_ON_L + (LED_NEXT_MASK * LEDPin);
 #ifdef RPI
         // Read current settings from LED_ON_H
-        int settings = wiringPiI2CReadReg8(m_fd, LEDRegister + 1);
+        int settings = wiringPiI2CReadReg8(m_activePCA9685->fileDescriptor, LEDRegister + 1);
         settings |= LED_FULL_ON_OFF_MASK;       // Set full ON mask
 
         // Write to register
-        wiringPiI2CWriteReg8(m_fd, LEDRegister, settings);
+        wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, LEDRegister, settings);
 
         // Ensure that the LED_OFF_H bit 4 is set low aswell
-        settings = wiringPiI2CReadReg8(m_fd, LEDRegister + 3);
+        settings = wiringPiI2CReadReg8(m_activePCA9685->fileDescriptor, LEDRegister + 3);
         settings &= LED_FULL_NEGATED;
-        wiringPiI2CWriteReg8(m_fd, LEDRegister, settings);
+        wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, LEDRegister, settings);
 #endif
+
+        // Insert the new value into the current PCA9686;
+        insertNewPinValue(&m_activePCA9685->pinOutputList, LEDPin, FREQ_RESOLUTION);
+    }
+    else
+    {
+        printf("ERROR. LEDPin is above maximum of 15\n");
     }
 }
 
@@ -205,12 +327,19 @@ void PCA9685LEDOff(uint8_t LEDPin)
         uint8_t LEDRegister = LED0_ON_L + (LED_NEXT_MASK * LEDPin);
 #ifdef PRPI
         // Read current settings from LED_OFF_H
-        int settings = wiringPiI2CReadReg8(m_fd, LEDRegister + 3);
+        int settings = wiringPiI2CReadReg8(m_activePCA9685->fileDescriptor, LEDRegister + 3);
         settings |= LED_FULL_ON_OFF_MASK;
 
         // Write to register
-        wiringPiI2CWriteReg8(m_fd, LEDRegister, settings);
+        wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, LEDRegister, settings);
 #endif
+
+        // Insert the new value into the current PCA9686;
+        insertNewPinValue(&m_activePCA9685->pinOutputList, LEDPin, 0);
+    }
+    else
+    {
+        printf("ERROR. LEDPin is above maximum of 15\n");
     }
 }
 
@@ -221,12 +350,20 @@ void PCA9685AllLEDsOn()
 {
 #ifdef RPI
     // Read current settings
-    int settings = wiringPiI2CReadReg8(m_fd, ALL_LED_ON_H);
+    int settings = wiringPiI2CReadReg8(m_activePCA9685->fileDescriptor, ALL_LED_ON_H);
     settings |= LED_FULL_ON_OFF_MASK;
 
     // Write to register
-    wiringPiI2CWriteReg8(m_fd, ALL_LED_ON_H, settings);
+    wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, ALL_LED_ON_H, settings);
 #endif
+
+    // Iterate through all pin values and set them high
+    PinOutputList* head = m_activePCA9685->pinOutputList;
+    while(head != NULL)
+    {
+        head->pinOutput.value = FREQ_RESOLUTION;
+        head = head->next;
+    }
 }
 
 /**
@@ -236,22 +373,30 @@ void PCA9685AllLEDsOff()
 {
 #ifdef RPI
     // Read current settings
-    int settings = wiringPiI2CReadReg8(m_fd, ALL_LED_OFF_H);
+    int settings = wiringPiI2CReadReg8(m_activePCA9685->fileDescriptor, ALL_LED_OFF_H);
     settings |= LED_FULL_ON_OFF_MASK;
 
     // Write to register
-    wiringPiI2CWriteReg8(m_fd, ALL_LED_OFF_H, settings);
+    wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, ALL_LED_OFF_H, settings);
 #endif
+
+    // Iterate through all pin values and set them high
+    PinOutputList* head = m_activePCA9685->pinOutputList;
+    while(head != NULL)
+    {
+        head->pinOutput.value = 0;
+        head = head->next;
+    }
 }
 
 /**
- * @brief Get the file descriptor for the I2C port
+ * @brief Get the active PCA9685 module;
  *
  * @return
  */
-int getFileDescriptor()
+PCA9685* getActivePCA9685Struct()
 {
-    return m_fd;
+    return m_activePCA9685;
 }
 
 
