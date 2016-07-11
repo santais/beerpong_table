@@ -15,10 +15,10 @@ SET(CMAKE_CXX_FLAGS "-pthread" "-lwiringPi")
 
 # Add math library
 target_link_libraries(${PROJECT_NAME} m)
-target_link_libraries(${PROJECT_NAME} wiringPi)
 # Add option to choose among RPI and X86
 OPTION(RPI "Option description" OFF) # Enabled by default
 
 IF(RPI)
     ADD_DEFINITIONS(-DRPI)
+    target_link_libraries(${PROJECT_NAME} wiringPi)
 ENDIF(RPI)
