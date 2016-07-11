@@ -146,11 +146,11 @@ void PCA9685Reset()
 
     if(mode1)
     {
-        int settings = mode & MODE1_WAKE_MASK;      // Clear SLEEP bit
-        wiringPiI2CReadReg8(m_activePCA9685->fileDescriptor, MODE1, settings);
+        int settings = mode1 & MODE1_WAKE_MASK;      // Clear SLEEP bit
+        wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, MODE1, settings);
         usleep(500);                                // Sleep for 500 microseconds
         settings |= MODE1_RESTART_MASK;
-        wiringPiI2CReadReg8(m_activePCA9685->fileDescriptor, MODE1, settings);
+        wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, MODE1, settings);
     }
 #endif
 }
