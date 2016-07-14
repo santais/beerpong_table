@@ -182,7 +182,7 @@ void testProgram()
     sleep(1);
 
     PCA9685LEDOff(2);
-    sleeo(1);
+    sleep(1);
 
     // Try different colour combinations
     PCA9685SetPWMDC(0, 50);
