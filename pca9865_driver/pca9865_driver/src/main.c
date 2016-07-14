@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
 
     static char inputChar[MAX_CHAR_SIZE] = {};
 
-#ifdef RPI
+#ifdef ARM
     printf("This is RPI\n");
 #else
     printf("This is x86!\n");

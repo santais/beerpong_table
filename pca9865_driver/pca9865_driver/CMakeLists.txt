@@ -1,4 +1,4 @@
-project(pca9865_driver)
+project(pca9685_driver)
 cmake_minimum_required(VERSION 2.8)
 
 # Add the headers
@@ -19,6 +19,6 @@ target_link_libraries(${PROJECT_NAME} m)
 OPTION(ARM "Option description" OFF) # Enabled by default
 
 IF(ARM)
-    ADD_DEFINITIONS(-DRPI)
+    ADD_DEFINITIONS(-DARM)
     target_link_libraries(${PROJECT_NAME} wiringPi)
 ENDIF(ARM)

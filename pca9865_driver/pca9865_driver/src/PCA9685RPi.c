@@ -131,7 +131,7 @@ int PCA9685Setup(const uint8_t i2cAddress, uint16_t freq)
     // Settup the frequency
     PCA9685SetFreq(m_activePCA9685->frequency);
 #endif
-
+    
     return m_activePCA9685->fileDescriptor;
 }
 
@@ -238,18 +238,17 @@ void PCA9685SetPWM(uint8_t LEDPin, uint16_t onTime, uint16_t offTime)
         wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, LEDRegister, LEDRegisterVal);
         LEDRegisterVal = onTime >> LED_H_SHIFT_MASK;                // LED_ON_H
         wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, LEDRegister + 1, LEDRegisterVal);
-
         LEDRegisterVal = offTime & LED_L_MASK;                      // LED_OFF_L
         wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, LEDRegister + 2, LEDRegisterVal);
         LEDRegisterVal = offTime & LED_H_SHIFT_MASK;                // LED_OFF_H
         wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, LEDRegister + 3, LEDRegisterVal);
+
+        // DEBUG
+        printf("Pin %i with onTime %i and offTime %i\n", LEDPin, onTime, offTime);
 #endif
 
         // Insert the new value into the current PCA9686;
         insertNewPinValue(&m_activePCA9685->pinOutputList, LEDPin, onTime);
-
-        // DEBUG
-        printf("Pin %i with onTime %i and offTime %i\n", LEDPin, onTime, offTime);
     }
     else
     {
