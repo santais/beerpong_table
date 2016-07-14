@@ -251,7 +251,7 @@ int main(int argc, char *argv[])
     {
         printf("Please select either of the following functions: \n");
         printf("1: Set PWM  2: Get PWM  3: Set LED Full ON  4: Set LED Full OFF  5: Set All LEDs Full ON  6: Set All LEDs Full Off  7: Set Frequency  8: Reset"
-               "  9: Get FD  A: Get PCA9685 Module\n");
+               "  9: Get FD  A: Get PCA9685 Module  B: Run Test Program\n");
         printf("Type input: ");
         fgets(inputChar, MAX_CHAR_SIZE, stdin);
         printf("\n");
@@ -296,6 +296,10 @@ int main(int argc, char *argv[])
 
         case 'A':
             displayPCA9685Struct();
+            break;
+
+        case 'B':
+            testProgram();
             break;
 
         default:
