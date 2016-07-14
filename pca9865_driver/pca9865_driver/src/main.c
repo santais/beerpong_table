@@ -160,6 +160,63 @@ void displayPCA9685Struct()
     printf("=====================================\n");
 }
 
+void testProgram()
+{
+    // Turn all off
+    PCA9685AllLEDsOn();
+    sleep(1);
+
+    PCA9685AllLEDsOff();
+    sleep(1);
+
+    // Turn each one individually
+    PCA9685LEDOn(0);
+    sleep(1);
+
+    PCA9685LEDOff(0);
+    PCA9685LEDOn(1);
+    sleep(1);
+
+    PCA9685LEDOff(1);
+    PCA9685LEDOn(2);
+    sleep(1);
+
+    PCA9685LEDOff(2);
+    sleeo(1);
+
+    // Try different colour combinations
+    PCA9685SetPWMDC(0, 50);
+    PCA9685SetPWMDC(1, 10);
+    PCA9685SetPWMDC(2, 100);
+    sleep(1);
+
+    PCA9685SetPWMDC(0, 0);
+    PCA9685SetPWMDC(1, 100);
+    PCA9685SetPWMDC(2, 100);
+    sleep(0.9);
+
+    PCA9685SetPWMDC(0, 30);
+    PCA9685SetPWMDC(1, 30);
+    PCA9685SetPWMDC(2, 70);
+    sleep(0.8);
+
+    PCA9685SetPWMDC(0, 70);
+    PCA9685SetPWMDC(1, 10);
+    PCA9685SetPWMDC(2, 70);
+    sleep(0.7);
+
+    PCA9685SetPWMDC(0, 10);
+    PCA9685SetPWMDC(1, 10);
+    PCA9685SetPWMDC(2, 100);
+    sleep(0.6);
+
+    PCA9685SetPWMDC(0, 100);
+    PCA9685SetPWMDC(1, 10);
+    PCA9685SetPWMDC(2, 75);
+    sleep(0.5);
+
+}
+
 int main(int argc, char *argv[])
 {
     // Clear printf buffer immediately
