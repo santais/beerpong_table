@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "sn75hc595.h"
+#include "sn74hc595.h"
 
 #define NUM_OF_SHIFT_REGISTERS 1
 #define CE_CHANNEL			   0
@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 #endif
 
     // Setup the SN75HC595 Module
-    if(SN75HC595Setup(CE_CHANNEL, CLOCK_SPEED, NUM_OF_SHIFT_REGISTERS) < 0)
+    if(SN74HC595Setup(CE_CHANNEL, CLOCK_SPEED, NUM_OF_SHIFT_REGISTERS) < 0)
     {
     	//return 0;
     }
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 
     printf("Value is %c\n", inputChar[0]);
 
-    printf("Return value of write: %i\n", SN75HC595ReadWrite((uint8_t) inputChar[0], 1));
+    printf("Return value of write: %i\n", SN74HC595ReadWrite((uint8_t) inputChar[0], 1));
 
     return 0;
 }
