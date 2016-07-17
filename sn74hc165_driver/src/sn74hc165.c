@@ -93,7 +93,7 @@ int SN74HC165Setup(const uint8_t clkPin, const uint8_t clkEnPin,
  */
 uint8_t* SN74HC165Read()
 {
-    if(m_SN74HC165 != NULL)
+    if(m_SN74HC165 == NULL)
     {
         printf ("SN74HC165 not setup. Call SN74HC165Setup first %s\n", strerror (errno));
         return NULL;
@@ -124,21 +124,29 @@ uint8_t* SN74HC165Read()
     digitalWrite(m_SN74HC165->clkPin, HIGH);
     usleep(DEFAULT_FREQUENCY_PERIOD_MUS);
 
+//    uint8_t testRead[2] = {0b00110011, 0b11001100};
+
+  //  printf("value of testread is %u %u\n", testRead[0], testRead[1]);
+
     for(size_t i = 0; i < m_SN74HC165->numOfShiftRegisters; i++)
     {
         // Clear current reading
         data[i] = 0x00;
 
-        for(size_t bits = SHIFT_REGISTER_BIT_SIZE; bits > 0; bits++)
+        for(int bits = SHIFT_REGISTER_BIT_SIZE - 1; bits >= 0; --bits)
         {
             // Shift the current byte 1
             data[i] << 1;
-            data[i] & digitalRead(m_SN74HC165->dataPin);
-
+            data[i] |= digitalRead(m_SN74HC165->dataPin);
+//	    data[i] |= (testRead[i] & (1 << bits));
+	
             // Iterate to next input 
             runClkPulses(1, m_SN74HC165->clkPin);
         }
     }
+   
+    // Set the Latch pin high again
+    
 
 #endif
     

@@ -6,7 +6,7 @@
 #define SHLD_PIN		38
 #define QH_PIN 			40
 
-#define NUM_OF_SHIFT_REGISTERS 1
+#define NUM_OF_SHIFT_REGISTERS 2
 
 #define MAX_CHAR_SIZE 3
 
@@ -29,6 +29,8 @@ int main(int argc, char *argv[])
     	printf("Error setting up SN74HC165Setup: %s\n", strerror(errno));
     	return 0;
     }
+    
+    printf("SN75HC165Setup successfully setup\n");
 
     uint8_t* data = SN74HC165Read();
 
@@ -36,8 +38,6 @@ int main(int argc, char *argv[])
     {
     	printf("Data of shift register: %zu is %u\n", i, data[i]);
     }
-
-    printf("Successfully setup SN74HC165Setup Driver\n");
 
     return 0;
 }
