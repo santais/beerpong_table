@@ -6,10 +6,36 @@
 #define DEFAULT_FREQUENCY_HZ            1000000
 #define DEFAULT_FREQUENCY_PERIOD_MUS    (1/DEFAULT_FREQUENCY_HZ) * SECONDS_TO_MICROSECONDS_MULTIPLIER
 
+#define SHIFT_REGISTER_BIT_SIZE 8
 /****************************/
 /*    Private Variables     */
 /****************************/
 static SN74HC165* m_SN74HC165 = NULL;
+
+
+/****************************/
+/*    Private Functions     */
+/****************************/
+
+/**
+ * @brief Runs a number of clock pulses on the clk pin
+ *
+ * @param numOfPulses   Number of clock pulses to run
+ */
+void runClkPulses(uint8_t numOfPulses, uint8_t pin)
+{
+#ifdef ARM
+    for(size_t i = 0; i < numOfPulses; i++)
+    {
+        digitalWrite(m_SN74HC165->clkPin, HIGH);
+        usleep(DEFAULT_FREQUENCY_PERIOD_MUS);
+        digitalWrite(m_SN74HC165->clkPin, LOW);
+        usleep(DEFAULT_FREQUENCY_PERIOD_MUS);
+    }
+#endif
+}
+
+
 
 /**
  * @brief
@@ -75,6 +101,46 @@ uint8_t* SN74HC165Read()
     
     // Initialize data array
     uint8_t* data = (uint8_t*) malloc(sizeof(uint8_t) * m_SN74HC165->numOfShiftRegisters);
+    uint8_t bitsToShift = 8 * m_SN74HC165->numOfShiftRegisters;
+
+#ifdef ARM
+    // Set clk high and then low, in which the reading starts
+    runClkPulses(1, m_SN74HC165->clkPin);
+
+    // Set SH/LD low. The parallel inputs are now read on the SN75HC196
+    digitalWrite(m_SN74HC165->latchPin, LOW);
+    digitalWrite(m_SN74HC165->clkPin, HIGH);
+    usleep(DEFAULT_FREQUENCY_PERIOD_MUS);
+
+    // Set high again 
+    digitalWrite(m_SN74HC165->latchPin, HIGH);
+    digitalWrite(m_SN74HC165->clkPin, LOW);
+    usleep(DEFAULT_FREQUENCY_PERIOD_MUS);
+
+    runClkPulses(1, m_SN74HC165->clkPin);
+
+    // Start reading the bits
+    digitalWrite(m_SN74HC165->clkEnPin, LOW);
+    digitalWrite(m_SN74HC165->clkPin, HIGH);
+    usleep(DEFAULT_FREQUENCY_PERIOD_MUS);
+
+    for(size_t i = 0; i < m_SN74HC165->numOfShiftRegisters; i++)
+    {
+        // Clear current reading
+        data[i] = 0x00;
+
+        for(size_t bits = SHIFT_REGISTER_BIT_SIZE; bits > 0; bits++)
+        {
+            // Shift the current byte 1
+            data[i] << 1;
+            data[i] & digitalRead(m_SN74HC165->dataPin);
+
+            // Iterate to next input 
+            runClkPulses(1, m_SN74HC165->clkPin);
+        }
+    }
+
+#endif
     
     return data;
 }

@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include "sn74hc165.h"
 
+#define CLOCK_PIN 		32
+#define CLOCK_INH_PIN	36
+#define SHLD_PIN		38
+#define QH_PIN 			40
+
 #define NUM_OF_SHIFT_REGISTERS 1
 
 #define MAX_CHAR_SIZE 3
@@ -18,6 +23,21 @@ int main(int argc, char *argv[])
 #else
     printf("This is x86!\n");
 #endif
+
+    if(SN74HC165Setup(CLOCK_PIN, CLOCK_INH_PIN, SHLD_PIN, QH_PIN, NUM_OF_SHIFT_REGISTERS) < 0)
+    {
+    	printf("Error setting up SN74HC165Setup: %s\n", strerror(errno));
+    	return 0;
+    }
+
+    uint8_t* data = SN74HC165Read();
+
+    for(size_t i = 0; i < NUM_OF_SHIFT_REGISTERS; i++)
+    {
+    	printf("Data of shift register: %zu is %u\n", i, data[i]);
+    }
+
+    printf("Successfully setup SN74HC165Setup Driver\n");
 
     return 0;
 }
