@@ -1,5 +1,5 @@
 
-#include "SN74HC595.h"
+#include "sn74hc595.h"
 
 /****************************/
 /*    Private Variables     */
