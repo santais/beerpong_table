@@ -146,6 +146,7 @@ uint8_t* SN74HC165Read()
     }
    
     // Set the Latch pin high again
+    digitalWrite(m_SN74HC165->clkEnPin, HIGH);
     
 
 #endif
