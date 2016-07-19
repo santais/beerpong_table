@@ -52,7 +52,7 @@ int SN74HC595Setup1(uint8_t channel, int speed, uint8_t numOfShiftRegisters)
 	m_activeSN74HC595->channel &= 1; 	// Channel is either 0 or 1
 	m_activeSN74HC595->speed = speed;
 
-
+#ifdef ARM
 	if ((m_activeSN74HC595->fileDescriptor = open (channel == 0 ? spiDev0 : spiDev1, O_RDWR)) < 0)
 	{
 		printf ("Unable to open SPI device: %s\n", strerror (errno));
@@ -77,6 +77,7 @@ int SN74HC595Setup1(uint8_t channel, int speed, uint8_t numOfShiftRegisters)
 		printf ("SPI Speed Change failure: %s\n", strerror (errno));
 		return -1;
 	}
+#endif
 
 	return m_activeSN74HC595->fileDescriptor;
 }

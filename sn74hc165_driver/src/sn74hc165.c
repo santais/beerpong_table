@@ -101,7 +101,6 @@ uint8_t* SN74HC165Read()
     
     // Initialize data array
     uint8_t* data = (uint8_t*) malloc(sizeof(uint8_t) * m_SN74HC165->numOfShiftRegisters);
-    uint8_t bitsToShift = 8 * m_SN74HC165->numOfShiftRegisters;
 
 #ifdef ARM
     // Set clk high and then low, in which the reading starts

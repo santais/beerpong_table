@@ -20,9 +20,7 @@
 #include "wiringPi.h"
 #endif
 
-#ifdef __cplusplus
-    extern "C" {
-#endif
+
 
 typedef struct 
 {
@@ -77,9 +75,5 @@ SN74HC165 getSN74HC165fStruct();
  * @brief Returns the active frequency
  */
 int getFrequency();
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* _SN74HC165_H_ */
