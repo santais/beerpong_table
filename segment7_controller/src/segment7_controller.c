@@ -114,7 +114,7 @@ void sendDataToSegment(uint8_t* dataInput, uint8_t len)
 	}
 
 	// Send the data to the SN74HC595 driver
-	printf("Return value of SPI Read is: %i\n", SN74HC595ReadWrite(dataOutput, len));
+	printf("Return value of SPI Read is: %i\n", SN74HC595Write(dataOutput));
 }
 
 /**
@@ -269,7 +269,8 @@ int segment7Setup(uint8_t numOfSegmentPairs, SegmentValueCallback cb)
 	}
 
 
-	if(SN74HC595Setup(SN74HC595_CE_CHANNEL, SN74HC595_CLOCK_SPEED, numOfSegmentPairs * 2) < 0)
+	if(SN74HC595Setup(SN74HC595_CLOCK_PIN, SN74HC595_CLOCK_EN_PIN, SN74HC595_DATA_PIN,
+		 numOfSegmentPairs * 2) < 0)
 	{
 		printf("Unable to setup SN74HC595\n");
 		return -1;
