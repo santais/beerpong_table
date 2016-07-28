@@ -81,17 +81,20 @@ int SN74HC595Write(uint8_t* data)
     digitalWrite(m_activeSN74HC595->clkEnPin, LOW);
     digitalWrite(m_activeSN74HC595->clkPin, LOW);
 
+    printf("lolol %i\n", m_activeSN74HC595->clkPin);
+	
     for(size_t i = 0; i < m_activeSN74HC595->numOfShiftRegisters; i++)
     {
-    	for(uint8_t bits = SHIFT_REGISTER_BIT_SIZE - 1; bits >= 0; --bits)
+    	for(int bits = SHIFT_REGISTER_BIT_SIZE - 1; bits >= 0; --bits)
     	{
     		digitalWrite(m_activeSN74HC595->dataPin, data[i] & (1 << bits));
-
+		printf("Bit is: %i\n", data[i] & (1 << bits));
     		digitalWrite(m_activeSN74HC595->clkPin, HIGH);
+//		sleep(2);
     		usleep(DEFAULT_FREQUENCY_PERIOD_MUS);
     		digitalWrite(m_activeSN74HC595->clkPin, LOW);
     		usleep(DEFAULT_FREQUENCY_PERIOD_MUS);
-
+//		sleep(2);
     	}
     }
 

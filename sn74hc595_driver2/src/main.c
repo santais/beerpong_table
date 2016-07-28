@@ -14,11 +14,14 @@ int main(int argc, char *argv[])
     // Clear printf buffer immediately
     setbuf(stdout, NULL);
 
-    static char buffer[MAX_CHAR_SIZE] = {};
+    static uint8_t buffer[MAX_CHAR_SIZE] = {};
 
 
 #ifdef ARM
     printf("This is RPI\n");
+   // Setup wiringPi
+    wiringPiSetup();
+
 #else
     printf("This is x86!\n");
 #endif
@@ -58,8 +61,9 @@ int main(int argc, char *argv[])
 
         printf("Value is %i\n", val);
         buffer[0] = (uint8_t) val;
+	printf("Buffer value 0 is: %i\n", buffer[0]);
 
-        printf("Return value of write: %i\n", SN74HC595Write(buffer[0]));
+        printf("Return value of write: %i\n", SN74HC595Write(buffer));
     }
 
     return 0;
