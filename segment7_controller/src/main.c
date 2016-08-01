@@ -12,7 +12,7 @@ void segmentCallback(Segment7* segment7)
 int main()
 {
 	printf("Starting segment7 test program\n");
-
+    wiringPiSetup();
     // Clear printf buffer immediately
     setbuf(stdout, NULL);
     uint8_t isRunning = 1;

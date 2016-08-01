@@ -18,6 +18,7 @@ find_package (Threads)
 
 # Set Flags
 SET(CMAKE_CXX_FLAGS "-pthread" "-lwiringPi")
+SET(CMAKE_C_FLAGS "-std=c99")
 
 # Add math library
 target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} m)

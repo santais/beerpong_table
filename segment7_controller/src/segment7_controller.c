@@ -269,8 +269,8 @@ int segment7Setup(uint8_t numOfSegmentPairs, SegmentValueCallback cb)
 	}
 
 
-	if(SN74HC595Setup(SN74HC595_SR_CLK_PIN, SN74HC595_RCLK_PIN, SN74HC595_SER_PIN, 
-		numOfSegmentPairs * 2) < 0)
+	if(SN74HC595Setup(SN74HC595_CLOCK_PIN, SN74HC595_CLOCK_EN_PIN, SN74HC595_DATA_PIN,
+		 numOfSegmentPairs * 2) < 0)
 	{
 		printf("Unable to setup SN74HC595\n");
 		return -1;
