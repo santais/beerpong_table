@@ -19,10 +19,12 @@ static SN74HC595* m_activeSN74HC595 = NULL;
 
 void pulsePin(uint8_t pin)
 {
+#ifdef ARM
 	digitalWrite(pin, 0);
 	usleep(DEFAULT_FREQUENCY_PERIOD_MUS);
 	digitalWrite(pin, 1);
 	usleep(DEFAULT_FREQUENCY_PERIOD_MUS);
+#endif
 }
 
 
@@ -101,7 +103,6 @@ int SN74HC595Write(uint8_t* data)
 
     // Set the latch pin high to store the data
     pulsePin(m_activeSN74HC595->clkEnPin);
-
 
 #endif
     return 1;
