@@ -4,7 +4,7 @@
 #define SHIFT_REGISTER_BIT_SIZE 8
 
 #define SECONDS_TO_MICROSECONDS_MULTIPLIER 1000000
-#define DEFAULT_FREQUENCY_HZ            1000000
+#define DEFAULT_FREQUENCY_HZ            100000
 #define DEFAULT_FREQUENCY_PERIOD_MUS    (1/DEFAULT_FREQUENCY_HZ) * SECONDS_TO_MICROSECONDS_MULTIPLIER
 /****************************/
 /*    Private Variables     */
@@ -16,6 +16,14 @@ static SN74HC595* m_activeSN74HC595 = NULL;
 /*    Private Functions     */
 /****************************/
 
+
+void pulsePin(uint8_t pin)
+{
+	digitalWrite(pin, 0);
+	usleep(DEFAULT_FREQUENCY_PERIOD_MUS);
+	digitalWrite(pin, 1);
+	usleep(DEFAULT_FREQUENCY_PERIOD_MUS);
+}
 
 
 /**
@@ -78,29 +86,23 @@ int SN74HC595Write(uint8_t* data)
         return -1;
     }
 #ifdef ARM
-    // Set ŔCLK low while loading data into the register
-    digitalWrite(m_activeSN74HC595->clkEnPin, LOW);
-    digitalWrite(m_activeSN74HC595->clkPin, LOW);
 	
     printf("Number of shift registers: %i\n", m_activeSN74HC595->numOfShiftRegisters);
     for(size_t i = 0; i < m_activeSN74HC595->numOfShiftRegisters; i++)
     {
 	printf("Writing data: %#08x\n", data[i]);
-    	for(int bits = SHIFT_REGISTER_BIT_SIZE - 1; bits >= 0; --bits)
+    	for(int bits = SHIFT_REGISTER_BIT_SIZE - 1; bits >= 0; bits--)
     	{
     		digitalWrite(m_activeSN74HC595->dataPin, data[i] & (1 << bits));
-//		printf("Bit is: %i\n", data[i] & (1 << bits));
-    		digitalWrite(m_activeSN74HC595->clkPin, HIGH);
-//		sleep(2);
-    		usleep(DEFAULT_FREQUENCY_PERIOD_MUS);
-    		digitalWrite(m_activeSN74HC595->clkPin, LOW);
-    		usleep(DEFAULT_FREQUENCY_PERIOD_MUS);
-//		sleep(2);
+		printf("Bit is: %i\n", data[i] & (1 << bits));
+    		pulsePin(m_activeSN74HC595->clkPin);
     	}
     }
 
     // Set the latch pin high to store the data
-    digitalWrite(m_activeSN74HC595->clkEnPin, HIGH);
+    pulsePin(m_activeSN74HC595->clkEnPin);
+
+
 #endif
     return 1;
 }

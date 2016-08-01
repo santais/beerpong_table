@@ -8,7 +8,6 @@
 #define RCLK_PIN         16
 #define SER_PIN          1
 
-
 int main(int argc, char *argv[])
 {
     // Clear printf buffer immediately
@@ -68,3 +67,4 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
