@@ -49,6 +49,7 @@ int SN74HC595Setup(const uint8_t clkPin, const uint8_t clkEnPin,
 
 #ifdef ARM
 
+	
 	pinMode(clkPin, OUTPUT);
 	pinMode(clkEnPin, OUTPUT);
 	pinMode(dataPin, OUTPUT);
