@@ -12,8 +12,10 @@ void segmentCallback(Segment7* segment7)
 int main()
 {
 	printf("Starting segment7 test program\n");
+#ifdef ARM
     wiringPiSetup();
-    // Clear printf buffer immediately
+#endif    
+// Clear printf buffer immediately
     setbuf(stdout, NULL);
     uint8_t isRunning = 1;
 
