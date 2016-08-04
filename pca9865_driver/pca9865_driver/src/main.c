@@ -217,6 +217,70 @@ void testProgram()
 
 }
 
+void testProgram2()
+{
+
+    PCA9685AllLEDsOff();
+    usleep(500);
+
+    // Red LED UP
+    for(int i = 0; i < 100; i++)
+    {
+        PCA9685SetPWMDC(0, i);
+        usleep(10000);
+    }
+    // Red LED DOWN
+    for(int i = 100; i > 0; i--)
+    {
+        PCA9685SetPWMDC(0, i);
+        usleep(10000);
+    }
+
+    // Green LED UP
+    for(int i = 0; i < 100; i++)
+    {
+        PCA9685SetPWMDC(1, i);
+        usleep(10000);
+    }
+    // Green LED DOWN
+    for(int i = 100; i > 0; i--)
+    {
+        PCA9685SetPWMDC(1, i);
+        usleep(10000);
+    }
+
+
+    // Blue LED UP
+    for(int i = 0; i < 100; i++)
+    {
+        PCA9685SetPWMDC(2, i);
+        usleep(10000);
+    }
+    // Blue LED DOWN
+    for(int i = 100; i > 0; i--)
+    {
+        PCA9685SetPWMDC(2, i);
+        usleep(10000);
+    }
+
+    // Go crazy
+    for(long long i = 1000000; i > 1000; i -= 100000)
+    {
+        PCA9685SetPWMDC(0, 100);
+        usleep(i);
+        PCA9685SetPWMDC(0, 0);
+        usleep(500);
+        PCA9685SetPWMDC(1, 100);
+        usleep(i);
+        PCA9685SetPWMDC(1, 0);
+        usleep(500);
+        PCA9685SetPWMDC(2, 100);
+        usleep(i);
+        PCA9685SetPWMDC(2, 0);
+        usleep(500);
+    }
+}
+
 int main(int argc, char *argv[])
 {
     // Clear printf buffer immediately
@@ -299,7 +363,7 @@ int main(int argc, char *argv[])
             break;
 
         case 'B':
-            testProgram();
+            testProgram2();
             break;
 
         default:
