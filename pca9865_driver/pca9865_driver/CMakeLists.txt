@@ -12,6 +12,7 @@ add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
 # Set Flags
 SET(CMAKE_CXX_FLAGS "-pthread" "-lwiringPi")
+set(CMAKE_C_FLAGS "-std=c99")
 
 # Add math library
 target_link_libraries(${PROJECT_NAME} m)
