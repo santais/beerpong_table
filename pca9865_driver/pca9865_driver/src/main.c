@@ -264,7 +264,7 @@ void testProgram2()
     }
 
     // Go crazy
-    for(long long i = 1000000; i > 1000; i -= 100000)
+    for(long long i = 500000; i > 1000; i -= 10000)
     {
         PCA9685SetPWMDC(0, 100);
         usleep(i);
@@ -276,6 +276,24 @@ void testProgram2()
         usleep(500);
         PCA9685SetPWMDC(2, 100);
         usleep(i);
+        PCA9685SetPWMDC(2, 0);
+        usleep(500);
+    }
+
+   // Go crazy fast!!!
+    int delayTime= 10000;
+    for(int i = 0; i < 1000; i++)
+    {
+        PCA9685SetPWMDC(0, 100);
+        usleep(delayTime);
+        PCA9685SetPWMDC(0, 0);
+        usleep(500);
+        PCA9685SetPWMDC(1, 100);
+        usleep(delayTime);
+        PCA9685SetPWMDC(1, 0);
+        usleep(500);
+        PCA9685SetPWMDC(2, 100);
+        usleep(delayTime);
         PCA9685SetPWMDC(2, 0);
         usleep(500);
     }

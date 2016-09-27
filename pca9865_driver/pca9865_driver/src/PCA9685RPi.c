@@ -1,4 +1,5 @@
 #include "PCA9685RPi.h"
+#include "wiringPi.h"
 
 /****************************/
 /*    Private Variables     */
@@ -9,6 +10,7 @@ static PCA9685* m_activePCA9685 = NULL;
 /****************************/
 /*    Private Functions     */
 /****************************/
+static void vTestFadeFunc();
 
 /**
  * @brief Check if the pin has been initialized
@@ -117,6 +119,8 @@ int PCA9685Setup(const uint8_t i2cAddress, uint16_t freq)
     m_activePCA9685->i2cAddress = i2cAddress;
     m_activePCA9685->pinOutputList = NULL;
 
+    wiringPiSetup();
+
     // Setup the I2C Port
 #ifdef ARM
     m_activePCA9685->fileDescriptor = wiringPiI2CSetup(m_activePCA9685->i2cAddress);
@@ -214,7 +218,7 @@ uint16_t PCA9685SetFreq(uint16_t freq)
  */
 void PCA9685SetPWMDC(uint8_t LEDPin, uint8_t dutyCycle)
 {
-    printf("Current I2C Address is: %i\n", m_activePCA9685->i2cAddress);
+  //  printf("Current I2C Address is: %i\n", m_activePCA9685->i2cAddress);
     // Calculate max and minimum duty cycle
     uint8_t m_dutyCycle = dutyCycle;
     if(dutyCycle > 100)
@@ -222,7 +226,7 @@ void PCA9685SetPWMDC(uint8_t LEDPin, uint8_t dutyCycle)
         m_dutyCycle = 100;
     }
 
-    printf("Pin %i and duty cycle %i\n", LEDPin, dutyCycle);
+//    printf("Pin %i and duty cycle %i\n", LEDPin, dutyCycle);
 
     // Get lower and upper values
     uint16_t offTime = 0;
@@ -255,20 +259,20 @@ void PCA9685SetPWM(uint8_t LEDPin, uint16_t onTime, uint16_t offTime)
 #ifdef ARM
         // Calculate the on and off time and write to the registers
         uint8_t LEDRegisterVal = onTime & LED_L_MASK;               // LED_ON_L
-        printf("LED_ON_L: %i\n", LEDRegisterVal);
+    //    printf("LED_ON_L: %i\n", LEDRegisterVal);
         wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, LEDRegister, LEDRegisterVal);
         LEDRegisterVal = onTime >> LED_H_SHIFT_MASK;                // LED_ON_H
-	printf("LED_ON_H: %i\n", LEDRegisterVal);
+//	printf("LED_ON_H: %i\n", LEDRegisterVal);
         wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, LEDRegister + 1, LEDRegisterVal);
         LEDRegisterVal = offTime & LED_L_MASK;                      // LED_OFF_L
-	printf("LED_OFF_L: %i\n", LEDRegisterVal);
+//	printf("LED_OFF_L: %i\n", LEDRegisterVal);
         wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, LEDRegister + 2, LEDRegisterVal);
         LEDRegisterVal = offTime >> LED_H_SHIFT_MASK;                // LED_OFF_H
-	printf("LED_OFF_H: %i\n", LEDRegisterVal);
+//	printf("LED_OFF_H: %i\n", LEDRegisterVal);
         wiringPiI2CWriteReg8(m_activePCA9685->fileDescriptor, LEDRegister + 3, LEDRegisterVal);
 
         // DEBUG
-        printf("Pin %i with onTime %i and offTime %i\n", LEDPin, onTime, offTime);
+  //      printf("Pin %i with onTime %i and offTime %i\n", LEDPin, onTime, offTime);
 #endif
 
         // Insert the new value into the current PCA9686;
@@ -405,6 +409,8 @@ void PCA9685AllLEDsOn()
  */
 void PCA9685AllLEDsOff()
 {
+    vTestFadeFunc();
+
 #ifdef ARM
     // Read current settings
     int settings = wiringPiI2CReadReg8(m_activePCA9685->fileDescriptor, ALL_LED_OFF_H);
@@ -434,4 +440,9 @@ PCA9685* getActivePCA9685Struct()
 }
 
 
-
+void vTestFadeFunc()
+{
+    PCA9685SetPWMDC(0, 50);
+    usleep(1000000);
+    PCA9685SetPWMDC(0, 0);
+}
