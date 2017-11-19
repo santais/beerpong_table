@@ -13,7 +13,7 @@
 //-------------------------------------------------------------------------------//
 #include "Arduino.h"
 #include "SystemController.h"
-#include "NetworkComm.h"
+#include "NetworkController.h"
 #include "Logger.h"
 
 //-------------------------------------------------------------------------------//

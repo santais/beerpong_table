@@ -13,8 +13,8 @@
 //-------------------------------------------------------------------------------//
 #include "Arduino.h"
 #include "LightController.h"
-#include "NetworkComm.h"
-#include <Adafruit_NeoPixel.h>
+#include "NetworkController.h"
+#include "Adafruit_NeoPixel.h"
 #include "Logger.h"
 //#include "Ws2812Driver.h"
 

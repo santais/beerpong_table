@@ -24,8 +24,7 @@
 
 // Arduino includes
 #include "Arduino.h"
-#include "NetworkComm.h"
-#include <WiFiMod.h>
+#include "NetworkController.h"
 #include "SensorController.h"
 #include "SystemController.h"
 #include "LightController.h"

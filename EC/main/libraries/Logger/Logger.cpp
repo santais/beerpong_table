@@ -9,7 +9,7 @@
 #include <stdarg.h>
 
 #include "Logger.h"
-#include "NetworkComm.h"
+#include "NetworkController.h"
 
 #include <errno.h>
 #include <string.h>
