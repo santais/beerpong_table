@@ -21,14 +21,14 @@
 								<option id="io.sloeber.compiler.cpp.sketch.option.incpath.846134277" name="Include Paths (-I)" superClass="io.sloeber.compiler.cpp.sketch.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/core/variant}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/Logger}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/TimerOne}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/AdafruitNeoPixel}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/LightController}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/NetworkController}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/SensorController}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/sn74hc165}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/SystemController}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/Logger/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/NetworkController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/AdafruitNeoPixel/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/SensorController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/SystemController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/LightController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/sn74hc165/src}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.cpp.sketch.input.1676605808" name="CPP source files" superClass="io.sloeber.compiler.cpp.sketch.input"/>
 							</tool>
@@ -51,6 +51,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/AdafruitNeoPixel}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/LightController}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/NetworkController}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/Logger/src}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.S.sketch.input.913084259" name="Assembly source files" superClass="io.sloeber.compiler.S.sketch.input"/>
 							</tool>

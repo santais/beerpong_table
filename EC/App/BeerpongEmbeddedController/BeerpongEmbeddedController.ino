@@ -99,7 +99,7 @@ void vAliveLedISR(void)
 /*********************************************************************************/
 void setup()
 {
-	int16_t i16Return = -1;
+  int16_t i16Return = -1;
   stShiftRegPins_t stShiftRegPins;
 
   // Protocol setup
