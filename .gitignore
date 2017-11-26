@@ -1,0 +1,3 @@
+# EC ignores
+EC/App/BeerpongEmbeddedController/Release/*
+EC/App/BeerpongEmbeddedController/RemoteSystemsTempFiles/*

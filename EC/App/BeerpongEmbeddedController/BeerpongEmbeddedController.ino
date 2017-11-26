@@ -1,16 +1,16 @@
 
 //--------------------------------------------------------------------------------//
-//	Name: 
+//	Name:
 //	Date: 04-10-16
 //	Author: Mark Ulletved Povlsen
-//	
-//	Description: 
+//
+//	Description:
 //
 //
 //-------------------------------------------------------------------------------//
 
 //-------------------------------------------------------------------------------//
-// INCLUDES 
+// INCLUDES
 //-------------------------------------------------------------------------------//
 
 // System Files
@@ -20,16 +20,16 @@
 #include <TimerOne.h>
 
 // User Libraries
-#include "libraries/sn74hc165/src/sn74hc165.h"
+#include <sn74hc165.h>
 #include <NetworkController.h>
-#include "libraries/SensorController/src/SensorController.h"
-#include "libraries/LightController/src/LightController.h"
-#include "libraries/Logger/src/Logger.h"
+#include <SensorController.h>
+#include <LightController.h>
+#include <Logger.h>
 
 //-------------------------------------------------------------------------------//
-// DEFINES 
+// DEFINES
 //-------------------------------------------------------------------------------//
-#define defNETWORK_SSID	((char*) "oblat61saldo98farce") 
+#define defNETWORK_SSID	((char*) "oblat61saldo98farce")
 #define defNETWORK_PW	((char*) "Mpnetwork2014!")
 
 #define defWIFI_SERVER_PORT ((uint16_t) 80)
@@ -44,7 +44,7 @@
 #define defSN74HC165_SDLD_PIN_O    ((uint8_t) 8)
 #define defSN74HC165_SER_PIN_I     ((uint8_t) 11)
 
-// WS2812 Data Pin 
+// WS2812 Data Pin
 #define defWS2812_DATA_PIN_O       ((uint8_t) 6)
 
 #define defMULTIPLEX_FREQ_HZ       ((uint8_t) 50)
@@ -82,7 +82,7 @@ void vAliveLedISR(void)
     digitalWrite(defBOARD_ALIVE_LED_PIN_O, HIGH);
     digitalWrite(defBOARD_WIFI_ALIVE_LED_PIN_O, HIGH);
     ui8Shift = 1;
-  } 
+  }
   else if(ui8Shift == 1)
   {
     digitalWrite(defBOARD_ALIVE_LED_PIN_O, LOW);
@@ -92,9 +92,9 @@ void vAliveLedISR(void)
 }
 
 /*********************************************************************************/
-// Description: 
-//                            
-// @param 
+// Description:
+//
+// @param
 // @return
 /*********************************************************************************/
 void setup()
@@ -108,7 +108,7 @@ void setup()
   pinMode(defBOARD_ALIVE_LED_PIN_O, OUTPUT);
   pinMode(defBOARD_WIFI_ALIVE_LED_PIN_O, OUTPUT);
 
-  // Initialize ALIVE LED timer 
+  // Initialize ALIVE LED timer
   Timer1.initialize(defALIVE_LED_ISR_FREQ_US);
   Timer1.attachInterrupt(vAliveLedISR);
 
@@ -126,9 +126,9 @@ void setup()
 }
 
 /*********************************************************************************/
-// Description: 
-//                            
-// @param 
+// Description:
+//
+// @param
 // @return
 /*********************************************************************************/
 void loop()
