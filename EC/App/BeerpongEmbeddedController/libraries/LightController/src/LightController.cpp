@@ -11,341 +11,336 @@
 //-------------------------------------------------------------------------------//
 // INCLUDES 
 //-------------------------------------------------------------------------------//
-#include "Arduino.h"
 #include "LightController.h"
-#include "NetworkController.h"
-#include "Adafruit_NeoPixel.h"
+#ifndef UNIT_TESTING
+#include "Arduino.h"
 #include "Logger.h"
-//#include "Ws2812Driver.h"
+#else
+#include <stddef.h>
+#endif
+
+namespace Controller
+{
 
 //-------------------------------------------------------------------------------//
-// DEFINES 
+// CONSTANTS
 //-------------------------------------------------------------------------------//
-#define NUM_OF_CUPS    ((uint8_t) 22)
-#define LEDS_PER_CUP   ((uint8_t) 16)
+const uint8_t LED_RGB_MAX_VAL           = 255u;
+const uint8_t RGB_BUF_START_INDEX       = 1u;
 
-#define defLED_RGB_MAX_VAL ((uint8_t) 255)
-
-#define defSINGLE_SET_BUF_SIZE_BYTES ((uint8_t) 4)
-#define defALL_SET_BUF_SIZE_BYTES    ((uint8_t) (ui32TmpDataUM_OF_CUPS * 3))
-//-------------------------------------------------------------------------------//
-// ENUM DECLARATION
-//-------------------------------------------------------------------------------//
-
-//-------------------------------------------------------------------------------//
-// STRUCT DECLARATION
-//-------------------------------------------------------------------------------//
-
-//-------------------------------------------------------------------------------//
-// EXTERN VARIABLES
-//-------------------------------------------------------------------------------//
-
-// Table to hold all lights
-static stCupLights_t stCupLightArray[NUM_OF_CUPS];
-
-// Strip object
-static Adafruit_NeoPixel* neoPixelStrip;
-
-//-------------------------------------------------------------------------------//
-// FUNCTIONS PROTOTYPES
-//-------------------------------------------------------------------------------//
-void vInitStWs2812Leds(stWs2812Led_t *stWs2812Led, uint8_t ui8NumOfWsLeds);
-void vInitLedValues(stLedValues_t *stLedValues);
-void vSetOutputLedValues(void);
-
-void vHandlePostRequest(stPackage* package);
-
-void vHandleSingleGetRequest(uint8_t *pui8Buffer, uint8_t ui8BufSize, uint32_t ui32IpAddr);
-void vHandleAllGetRequest(uint8_t *pui8Buffer, uint8_t ui8BufSize, uint32_t ui32IpAddr);
-
-void vSetWs2812Leds(uint8_t ui8CupId, stLedValues_t *stLedValues);
-
-//void vWriteLedValusToOutput(void);
 //-------------------------------------------------------------------------------//
 // FUNCTIONS
 //-------------------------------------------------------------------------------//
 
-/*********************************************************************************/
-// Description: 
-//                            
-// @param 
-// @return
-/*********************************************************************************/
-int16_t LightController_Init(uint8_t ui8DataPin)
-{
-	uint16_t i16Return = 1;
-
-	// Initialize the CupLightsArray
-	uint8_t ui8CupLightIdx = 0;
-	for(ui8CupLightIdx = 0; ui8CupLightIdx < NUM_OF_CUPS; ui8CupLightIdx++)
-	{
-		stCupLightArray[ui8CupLightIdx].ui8Id = ui8CupLightIdx;
-
-		// Init the WS2812 LEDS. 
-		// TODO: Only the first WS2812 is supported now. Therefore only [0] is inserted.
-		vInitStWs2812Leds(&stCupLightArray[ui8CupLightIdx].stWs2812Leds[0], defNUM_OF_WS2812_PER_CUP);
-	}
-
-	// Init the WS2812Driver
-	neoPixelStrip = new Adafruit_NeoPixel(LEDS_PER_CUP * NUM_OF_CUPS, ui8DataPin, NEO_GRB + NEO_KHZ800);
-	neoPixelStrip->begin();
-
-	return i16Return;
-}
-
-/*********************************************************************************/
-// Description: 
-//                            
-// @param 
-// @return
-/*********************************************************************************/
-void LightController_SetCupLed(uint8_t ui8CupId, uint8_t ui8Ws2812Id, stLedValues_t *stLedValues)
-{
-	stCupLightArray[ui8CupId].stWs2812Leds[ui8Ws2812Id].stLedValues = *stLedValues;
-}
-
-/*********************************************************************************/
-// Description: 
-//                            
-// @param 
-// @return
-/*********************************************************************************/
-stLedValues_t LightController_GetCupLed(uint8_t ui8CupId, uint8_t ui8Ws2812Id)
-{
-	return(stCupLightArray[ui8CupId].stWs2812Leds[ui8Ws2812Id].stLedValues);
-}
-
-/*********************************************************************************/
-// Description: 
-//                            
-// @param 
-// @return
-/*********************************************************************************/
-stCupLights_t* LightController_GetCupLightPtr(uint8_t ui8CupId)
-{
-	return(&stCupLightArray[ui8CupId]);
-}
-
-/*********************************************************************************/
-// Description: 
-//                            
-// @param 
-// @return
-/*********************************************************************************/
-void LightController_ReceiveDataPacket(stPackage* package)
-{
-	switch(package->header.bitHeader.module)
-	{
-		case E_SET_ALL_REQUEST:	// TODO: REMOVE
-		case E_SET_REQUEST:
-			vHandlePostRequest(package);
-		break;
-		break;
-		case E_GET_REQUEST:
-			vHandleSingleGetRequest(&package->payload[0], package->payloadSize, package->ipAddr);
-		break;
-		case E_GET_ALL_REQUEST:
-
-		break;
-		default:
-			BJBP_LOG_ERR("LIGHTCONTROLLER - UNKNOWN E HEADER MODULE REQUEST\n");
-		break;
-	}
-}
-
-/*********************************************************************************/
-// Description: 
-//                            
-// @param 
-// @return
-/*********************************************************************************/
-void vInitStWs2812Leds(stWs2812Led_t *stWs2812Led, uint8_t ui8NumOfWsLeds)
-{
-	uint8_t ui8Ws2812LedIdx = 0;
-
-	for(ui8Ws2812LedIdx = 0; ui8Ws2812LedIdx < ui8NumOfWsLeds; ui8Ws2812LedIdx++)
-	{
-		stWs2812Led[ui8Ws2812LedIdx].ui8Id = ui8Ws2812LedIdx;
-
-		vInitLedValues(&stWs2812Led[ui8Ws2812LedIdx].stLedValues);
-	}
-}
-
-/*********************************************************************************/
-// Description: 
-//                            
-// @param 
-// @return
-/*********************************************************************************/
-void vInitLedValues(stLedValues_t *stLedValues)
-{
-	// Default value is red
-	stLedValues->ui8RedValue   = defLED_RGB_MAX_VAL;
-	stLedValues->ui8GreenValue = 0;
-	stLedValues->ui8BlueValue  = 0;
-}
-
-/*********************************************************************************/
-// Description: 
-//                            
-// @param 
-// @return
-/*********************************************************************************/
-void vHandlePostRequest(stPackage* package)
-{
-	uint8_t ui8CupId = 0;
-	uint8_t ui8BufItr = 0;
-	uint8_t ui8NumOfLeds = package->payloadSize / defSINGLE_SET_BUF_SIZE_BYTES;
-	stLedValues_t stLedValues;
-
-	// Retreive the values from the buffer
-	if((package->payloadSize % defSINGLE_SET_BUF_SIZE_BYTES) > 0) 
-	{
-		//Serial.printf("LIGHTCONTROLLER - Buffer size too large in SET SINGLE! Size is: %u\n", ui8BufSize);
-	}
-	else
-	{
-		for(ui8BufItr = 0; ui8BufItr < ui8NumOfLeds; ui8BufItr++)
-		{
-			ui8CupId 			      = package->payload[(ui8BufItr * defSINGLE_SET_BUF_SIZE_BYTES)];
-			stLedValues.ui8RedValue   = package->payload[(ui8BufItr * defSINGLE_SET_BUF_SIZE_BYTES) + 1];
-			stLedValues.ui8GreenValue = package->payload[(ui8BufItr * defSINGLE_SET_BUF_SIZE_BYTES) + 2];
-			stLedValues.ui8BlueValue  = package->payload[(ui8BufItr * defSINGLE_SET_BUF_SIZE_BYTES) + 3];
-
-			// Set the values in the light array
-			vSetWs2812Leds(ui8CupId, &stLedValues);
-
-			// DEBUG
-			BJBP_LOG_INFO("Cup %u values R[%u] G[%u] B[%u] \n",
-			 	ui8CupId, stLedValues.ui8RedValue, stLedValues.ui8GreenValue, 
-				stLedValues.ui8BlueValue);
-
-			// Notify all of a new SET 
-			package->header.bitHeader.module = E_NOTIFY_ALL_REQUEST;
-			NetworkComm_TransmitPacket(package);
-		}
-
-		// Set the LED values on the output
-		//vWriteLedValusToOutput();
-		neoPixelStrip->show();
-	
-	}
-	Serial.println("out");
-}
-
-/*********************************************************************************/
-// Description: 
-//                            
-// @param 
-// @return
-/*********************************************************************************/
-void vHandleSingleGetRequest(uint8_t *pui8Buffer, uint8_t ui8BufSize, uint32_t ui32IpAddr)
-{
-	uint8_t ui8TransferBuf[defSINGLE_SET_BUF_SIZE_BYTES];
-	uint8_t ui8CupId = 0;
-	uint8_t ui8BufItr = 0;
-
-	stLedValues_t stLedValues;
-
-	// Get the cup Id and return a packet with the values
-	if(ui8BufSize > 1)
-	{
-		//Serial.printf("LIGHTCONTROLLER - Buffer size too large in GET SINGLE! Size is: %u\n", ui8BufSize);
-	}
-	else
-	{
-		ui8CupId = pui8Buffer[0];
-		if(ui8CupId > (NUM_OF_CUPS - 1))
-		{
-			//Serial.printf("LIGHTCONTROLLER - Invalid cup id of with value: %u\n", ui8CupId);
-		}
-		else 
-		{
-			// Trasfer package
-			stPackage transferPackage;
-
-			// Tmp buffer
-			uint8_t stLedTmpBuffer[defSINGLE_SET_BUF_SIZE_BYTES];
-			stLedTmpBuffer[0] = ui8CupId;
-			memcpy(&stLedTmpBuffer[1], &stCupLightArray[ui8CupId].stWs2812Leds[0].stLedValues, sizeof(stLedValues_t));
-
-			if(!NetworkComm_CreatePackage(&transferPackage, E_TARGET_LIGHT_REQUEST, E_GET_REQUEST, defSINGLE_SET_BUF_SIZE_BYTES,
-				&stLedTmpBuffer[0], ui32IpAddr))
-			{
-				BJBP_LOG_ERR("Unable to create lightcontroller GET package");
-			}
-			else
-			{
-				// Transmit the packet
-				NetworkComm_TransmitPacket(&transferPackage);
-			}
-
-			/*
-			ui8TransferBuf[ui8BufItr++] = ui8CupId;
-			ui8TransferBuf[ui8BufItr++] = stLedValues.ui8RedValue;
-			ui8TransferBuf[ui8BufItr++] = stLedValues.ui8GreenValue;
-			ui8TransferBuf[ui8BufItr]   = stLedValues.ui8BlueValue;*/
-		}
-	}
-}
-
-/*********************************************************************************/
-// Description: 
-//                            
-// @param 
-// @return
-/*********************************************************************************/
-void vHandleAllGetRequest(uint8_t *pui8Buffer, uint8_t ui8BufSize, uint32_t ui32IpAddr)
+RgbLeds::RgbLeds(uint8_t redVal, uint8_t greenVal, uint8_t blueVal) :
+        m_redval(redVal), m_greenVal(greenVal), m_blueVal(blueVal)
 {
 
 }
 
-/*********************************************************************************/
-// Description: 
-//                            
-// @param 
-// @return
-/*********************************************************************************/
-void vSetWs2812Leds(uint8_t ui8CupId, stLedValues_t *stLedValues)
+/**************************************************************/
+// Date: 16 Dec 2017
+// Function: Ws2812Led::Ws2812Led
+// Description: TODO
+// Inputs:
+// Output: TODO
+// Return:
+/**************************************************************/
+Ws2812Led::Ws2812Led() : m_id(0), RgbLeds(0, 0, 0)
 {
-	uint8_t ui8BufItr = 0;
-	uint8_t ui8RingStartIdx = ui8CupId * LEDS_PER_CUP;
-	uint8_t ui8RingIdx = 0;
 
-	stWs2812Led_t *stWs2812Leds = &stCupLightArray[ui8CupId].stWs2812Leds[0];
+}
+/**************************************************************/
+// Date: 15 Dec 2017
+// Function: Ws2812Led::Ws2812Led
+// Description: TODO
+// Inputs: uint8_t, uint8_t, uint8_t, uint8_t
+// Output: TODO
+// Return:
+/**************************************************************/
+Ws2812Led::Ws2812Led(uint8_t id, uint8_t redVal, uint8_t greenVal, uint8_t blueVal) :
+    m_id(id), RgbLeds(redVal, greenVal, blueVal)
+{}
 
-	// Iterate through the lights and set their values
-	for(ui8BufItr = 0; ui8BufItr < defNUM_OF_WS2812_PER_CUP; ui8BufItr++)
-	{
-		ui8RingIdx = ui8RingStartIdx + ui8BufItr;
-		stWs2812Leds[ui8BufItr].stLedValues = *stLedValues;
-
-		// Set neo pixel lights
-		neoPixelStrip->setPixelColor(ui8RingIdx, stLedValues->ui8RedValue, stLedValues->ui8GreenValue,
-			stLedValues->ui8BlueValue);
-	}
+/**************************************************************/
+// Date: 15 Dec 2017
+// Function: Ws2812Led::getId
+// Description: TODO
+// Inputs:
+// Output: TODO
+// Return: fhdruint8_t
+/**************************************************************/
+uint8_t Ws2812Led::getId()
+{
+    return m_id;
 }
 
-/*********************************************************************************/
-// Description: 
-//                            
-// @param 
-// @return
-/*********************************************************************************/
-/*void vWriteLedValusToOutput(void)
-{	
-	uint8_t ui8CupLightItr = 0;
-	uint8_t ui8Ws2812LedItr = 0;
+/**************************************************************/
+// Date: 15 Dec 2017
+// Function: Ws2812Led::setId
+// Description: TODO
+// Inputs: int
+// Output: TODO
+// Return: void
+/**************************************************************/
+void Ws2812Led::setId(int id)
+{
+    m_id = id;
+}
 
-	for(ui8CupLightItr = 0; ui8CupLightItr < NUM_OF_CUPS; ui8CupLightItr++)
-	{
-		for(ui8Ws2812LedItr = 0; ui8Ws2812LedItr < defNUM_OF_WS2812_PER_CUP; ui8Ws2812LedItr++)
-		{
-			//Ws2812Driver_Write(&stCupLightArray[ui8CupLightItr].stWs2812Leds[ui8Ws2812LedItr].stLedValues);
-		}
-	}
+/**************************************************************/
+// Date: 15 Dec 2017
+// Function: Ws2812Led::setRgbValues
+// Description: TODO
+// Inputs: uint8_t, uint8_t, uint8_t
+// Output: TODO
+// Return: void
+/**************************************************************/
+void Ws2812Led::setRgbValues(uint8_t redVal, uint8_t greenVal, uint8_t blueVal)
+{
+    m_redval = redVal;
+    m_greenVal = greenVal;
+    m_blueVal = blueVal;
+}
 
-	// Set the values!
-	Ws2812Driver_SetValues();
-}*/
+
+/**************************************************************/
+// Date: 15 Dec 2017
+// Function: CupLight::CupLight
+// Description: TODO
+// Inputs:
+// Output: TODO
+// Return:
+/**************************************************************/
+CupLight::CupLight() : m_id(0)
+{
+
+}
+
+/**************************************************************/
+// Date: 15 Dec 2017
+// Function: CupLight::CupLight
+// Description: TODO
+// Inputs: uint8_t
+// Output: TODO
+// Return:
+/**************************************************************/
+CupLight::CupLight(uint8_t id) : m_id(id)
+{
+    uint8_t cupIdItr = 0;
+
+    // Iterate through all the lights and initialize them
+    for(Ws2812Led& led : m_WsLeds)
+    {
+        led.setId(cupIdItr);
+        led.setRgbValues(LED_RGB_MAX_VAL, 0, 0);
+        cupIdItr++;
+    }
+}
+
+/**************************************************************/
+// Date: 15 Dec 2017
+// Function: CupLight::setId
+// Description: TODO
+// Inputs: uint8_t
+// Output: TODO
+// Return: fhdrvoid
+/**************************************************************/
+void CupLight::setId(uint8_t id)
+{
+    m_id = id;
+}
+
+/**************************************************************/
+// Date: 15 Dec 2017
+// Function: CupLight::getWsRef
+// Description: TODO
+// Inputs: uint8_t
+// Output: TODO
+// Return: Ws2812Led*
+/**************************************************************/
+Ws2812Led* CupLight::getWsRef(uint8_t id)
+{
+    Ws2812Led* ptrWsLed = NULL;
+
+    if(id < LEDS_PER_CUP)
+    {
+        ptrWsLed = &(m_WsLeds[id]);
+    }
+
+    return ptrWsLed;
+}
+
+/**************************************************************/
+// Date: 15 Dec 2017
+// Function: LightController::LightController
+// Description: TODO
+// Inputs: uint8_t
+// Output: TODO
+// Return:
+/**************************************************************/
+LightController::LightController(uint8_t dataPin)
+#ifndef UNIT_TESTING
+: m_ptrNeoPixelStrip(NULL)
+#endif
+{
+#ifndef UNIT_TESTING
+    m_ptrNeoPixelStrip = new Adafruit_NeoPixel((LEDS_PER_CUP * NUM_OF_CUPS), dataPin, NEO_GRB + NEO_KHZ800);
+    m_ptrNeoPixelStrip->begin();
+#endif
+
+    // Initialize all the cups
+    for(unsigned int i = 0; i < NUM_OF_CUPS; i++)
+    {
+        m_cupLights[i] = CupLight(i);
+
+        // Set the color
+        for(unsigned int j = 0; j < LEDS_PER_CUP; j++)
+        {
+            setNeoPixelLight(m_cupLights[i].getWsRef(j), i);
+        }
+    }
+
+    m_ptrNeoPixelStrip->show();
+}
+
+/**************************************************************/
+// Date: 15 Dec 2017
+// Function: LightController::~LightController
+// Description: TODO
+// Inputs:
+// Output: TODO
+// Return:
+/**************************************************************/
+LightController::~LightController()
+{
+
+}
+
+/**************************************************************/
+// Date: 15 Dec 2017
+// Function: LightController::handleGet
+// Description: TODO
+// Inputs: uint8_t*, uint8_t*
+// Output: TODO
+// Return: int
+/**************************************************************/
+int LightController::handleGet(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
+{
+    int retVal = -1;
+    uint8_t cupId = 0;
+
+    if((ptrBuffer != NULL) && (ptrBytesWritten != NULL))
+    {
+        retVal = 0;
+        cupId = ptrBuffer[0];
+
+        // Check the validity of the cup ID
+        if(cupId > (NUM_OF_CUPS - 1))
+        {
+#ifndef UNIT_TESTING
+            BJBP_LOG_ERR("Invalid cup ID %i", cupId);
+#endif
+            retVal = -1;
+        }
+        else
+        {
+            // Set the RGB values starting from index 1
+            Ws2812Led* ptrWsLed = m_cupLights[cupId].getWsRef(retVal);
+            ptrBuffer[RGB_BUF_START_INDEX] = ptrWsLed->getRedVal();
+            ptrBuffer[RGB_BUF_START_INDEX + 1] = ptrWsLed->getGreenVal();
+            ptrBuffer[RGB_BUF_START_INDEX + 2] = ptrWsLed->getBlueVal();
+
+            // Set the bytes written to the size of all thre RGB values and the index
+            *ptrBytesWritten = RGB_WS_LED_SIZE;
+        }
+    }
+    else
+    {
+#ifndef UNIT_TESTING
+        BJBP_LOG_ERR("Invalid buffer input");
+#endif
+    }
+
+    return retVal;
+}
+
+/**************************************************************/
+// Date: 15 Dec 2017
+// Function: LightController::handlePut
+// Description: TODO
+// Inputs: uint8_t*, uint8_t
+// Output: TODO
+// Return: fhdrint
+/**************************************************************/
+int LightController::handlePut(uint8_t* ptrPayload, uint8_t payloadSize)
+{
+    int retVal = 0;
+    uint8_t cupId = 0;
+    uint8_t numOfLeds = payloadSize / RGB_WS_LED_SIZE;
+
+    // Retreive the values from the buffer
+    if(((payloadSize % RGB_WS_LED_SIZE) > 0) || (payloadSize == 0))
+    {
+#ifndef UNIT_TESTING
+        BJBP_LOG_ERR("Payloadsize exceeds maximum LEDs");
+#endif
+        retVal = -1;
+    }
+    else
+    {
+        for(int i = 0; i < numOfLeds; i++)
+        {
+            // Get the RGB Reference
+            // NOTE: Only 1 color is allowed per WS right now.
+            cupId = ptrPayload[(i * RGB_WS_LED_SIZE)];
+
+            for(unsigned int j = 0; j < LEDS_PER_CUP; j++)
+            {
+                Ws2812Led* ptrWsLed = m_cupLights[cupId].getWsRef(j);
+
+                ptrWsLed->setRgbValues(ptrPayload[(i * RGB_WS_LED_SIZE) + 1], ptrPayload[(i * RGB_WS_LED_SIZE) + 2],
+                        ptrPayload[(i * RGB_WS_LED_SIZE) + 3]);
+
+                // Set the physical value of the neo pixel led
+                setNeoPixelLight(ptrWsLed, cupId);
+            }
+
+            // DEBUG
+#ifndef UNIT_TESTING
+         /*   BJBP_LOG_INFO("Cup %u values R[%u] G[%u] B[%u] \n",
+                cupId, ptrPayload[(i * RGB_WS_LED_SIZE) + 1], ptrPayload[(i * RGB_WS_LED_SIZE) + 2],
+                ptrPayload[(RGB_WS_LED_SIZE) + 3]);*/
+#endif
+        }
+
+        // Set the LED values on the output
+#ifndef UNIT_TESTING
+        m_ptrNeoPixelStrip->show();
+#endif
+    }
+
+    return retVal;
+}
+
+/**************************************************************/
+// Date: 15 Dec 2017
+// Function: LightController::setNeoPixelLight
+// Description: TODO
+// Inputs: Ws2812Led*
+// Output: TODO
+// Return: void
+/**************************************************************/
+void LightController::setNeoPixelLight(Ws2812Led* wsLed, uint8_t cupId)
+{
+    // Set the start ring buffer. This is seen as an array of lights starting from cup 0.
+    uint16_t wsLedStartIdx = (LEDS_PER_CUP * cupId) + wsLed->getId() ;
+
+    // Set neo pixel lights
+#ifndef UNIT_TESTING
+    m_ptrNeoPixelStrip->setPixelColor(wsLedStartIdx, wsLed->getRedVal(), wsLed->getGreenVal(), wsLed->getBlueVal());
+#endif
+}
+
+};
 

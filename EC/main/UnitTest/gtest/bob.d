@@ -1,0 +1,1 @@
+bob.o: ../bob.cpp
