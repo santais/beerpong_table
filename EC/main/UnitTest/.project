@@ -41,5 +41,40 @@
 			<type>2</type>
 			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/arduino/hardware/avr/1.6.20/variants/mega</locationURI>
 		</link>
+		<link>
+			<name>src/CommonTypes</name>
+			<type>2</type>
+			<location>/Users/markpovlsen/Documents/BeerpongTableProject/beerpong_table/EC/App/BeerpongEmbeddedController/libraries/CommonTypes</location>
+		</link>
+		<link>
+			<name>src/ControllerInterface</name>
+			<type>2</type>
+			<location>/Users/markpovlsen/Documents/BeerpongTableProject/beerpong_table/EC/App/BeerpongEmbeddedController/libraries/ControllerInterface</location>
+		</link>
+		<link>
+			<name>src/EdgeLightController</name>
+			<type>2</type>
+			<location>/Users/markpovlsen/Documents/BeerpongTableProject/beerpong_table/EC/App/BeerpongEmbeddedController/libraries/EdgeLightController</location>
+		</link>
+		<link>
+			<name>src/LightController</name>
+			<type>2</type>
+			<location>/Users/markpovlsen/Documents/BeerpongTableProject/beerpong_table/EC/App/BeerpongEmbeddedController/libraries/LightController</location>
+		</link>
+		<link>
+			<name>src/SensorController</name>
+			<type>2</type>
+			<location>/Users/markpovlsen/Documents/BeerpongTableProject/beerpong_table/EC/App/BeerpongEmbeddedController/libraries/SensorController</location>
+		</link>
+		<link>
+			<name>src/SystemController</name>
+			<type>2</type>
+			<location>/Users/markpovlsen/Documents/BeerpongTableProject/beerpong_table/EC/App/BeerpongEmbeddedController/libraries/SystemController</location>
+		</link>
+		<link>
+			<name>src/UnitController</name>
+			<type>2</type>
+			<location>/Users/markpovlsen/Documents/BeerpongTableProject/beerpong_table/EC/App/BeerpongEmbeddedController/libraries/UnitController</location>
+		</link>
 	</linkedResources>
 </projectDescription>

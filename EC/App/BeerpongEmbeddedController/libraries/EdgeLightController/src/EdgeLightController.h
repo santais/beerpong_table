@@ -8,32 +8,34 @@
 //
 //-------------------------------------------------------------------------------//
 
-#ifndef SYSTEMCONTROLLER_H_
-#define SYSTEMCONTROLLER_H_
+#ifndef EDGELIGHTCONTROLLER_H_
+#define EDGELIGHTCONTROLLER_H_
+
 
 //-------------------------------------------------------------------------------//
 // INCLUDES 
 //-------------------------------------------------------------------------------//
-#include <IRestController.h>
+#include <stdint.h>
 
-//-------------------------------------------------------------------------------//
-// DEFINES 
-//-------------------------------------------------------------------------------//
+#include "IRestController.h"
+#include "BjDataPackageDefines.h"
+#include "BjConfiguration.h"
+#ifndef UNIT_TESTING
+#include "Adafruit_NeoPixel.h"
+#include "Adafruit_PWMServoDriver.h"
+#endif
 
 namespace Controller
 {
 
 //-------------------------------------------------------------------------------//
+// DEFINES 
+//-------------------------------------------------------------------------------//
+
+//-------------------------------------------------------------------------------//
 // ENUM DECLARATION
 //-------------------------------------------------------------------------------//
-enum class ControllerState
-{
-	E_STATE_IDLE		    = 0x00,
-	E_STATE_MANUAL		= 0x01,
-	E_STATE_AUTOMATIC	= 0x02,
-	E_STATE_SEQUENCE	    = 0x03
-};
-	
+
 //-------------------------------------------------------------------------------//
 // STRUCT DECLARATION
 //-------------------------------------------------------------------------------//
@@ -46,24 +48,39 @@ enum class ControllerState
 // CLASS
 //-------------------------------------------------------------------------------//
 
-class SystemController : public IRestController
+class Ws2812Led;
+
+class EdgeLightController : public IRestController
 {
 public:
-    SystemController();
-    virtual ~SystemController();
+    EdgeLightController(uint8_t i2cAddr, float freq);
+    virtual ~EdgeLightController();
 
     virtual int handleGet(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten);
     virtual int handlePut(uint8_t* ptrPayload, uint8_t payloadSize);
     virtual int handlePost(uint8_t* ptrPayload, uint8_t payloadSize) {return 0;}
     virtual int handleDelete(uint8_t* ptrPayload, uint8_t payloadSize) {return 0;}
 
-    ControllerState getCtrlState() {return m_ctrlState;}
+#ifndef UNIT_TESTING
 private:
-    bool checkValidSetRequest(uint8_t ui8ControlState);
+#else
+public:
+#endif
 
-    ControllerState m_ctrlState;
+    uint16_t calcPwmOnTime(uint8_t rgbVal);
+    int16_t setRgbLight(Ws2812Led* ptrRgbLight, uint16_t* rgbPwmBuffer);
+    int16_t setPwm(uint8_t channelID, uint16_t* pwmValues, uint8_t numOfPwms);
+    int16_t getSingleRgbVal(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten);
+    int16_t getAllRgbVal(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten);
+
+#ifndef UNIT_TESTING
+    Adafruit_PWMServoDriver m_pwmDriver;
+#endif
+
+    Ws2812Led* m_rgbLeds[NUM_EDGE_LEDS];
+
 };
 
 };
 
-#endif /* SYSTEMCONTROLLER_H_ */
+#endif /* EDGELIGHTCONTROLLER_H_ */

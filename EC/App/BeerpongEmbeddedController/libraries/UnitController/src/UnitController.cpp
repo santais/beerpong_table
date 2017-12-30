@@ -134,7 +134,9 @@ bool UnitController::addController(IRestController& restController, TargetModule
             // Add the new controller
             m_controllerObjs[i] = new ControllerObj(restController, module);
 
+#ifndef UNIT_TESTING
             BJBP_LOG_INFO("Added controller ID %i\n", module);
+#endif
 
             retVal = true;
             break;
@@ -328,7 +330,9 @@ bool UnitController::checkSensorInput()
             // Handle the sensor update and copy the newly read sensor data into the stored datas
             if(sensorUpdate)
             {
+#ifndef UNIT_TESTING
                 BJBP_LOG_INFO("New sensor readings! \n");
+#endif
 
                 memcpy(m_sensorValues, tmpSensorReadings, NUM_OF_SENSORS);
                 retVal = handleSensorUpdate(m_sensorValues, NUM_OF_CUPS - 1);
@@ -402,6 +406,7 @@ bool UnitController::handleSensorUpdate(uint8_t* sensorReadings, uint8_t numOfSe
 bool UnitController::setLightsFromSensorVals(uint8_t* sensorReadings, uint8_t numOfSensors)
 {
     bool retVal = true;
+    uint8_t baseIdx = 0;
 
     // Get the Light controller reference if it exists
     IRestController* ptrLightCtrl = getRestCtrlRef(TargetModule::E_MODULE_LIGHT);
@@ -412,6 +417,7 @@ bool UnitController::setLightsFromSensorVals(uint8_t* sensorReadings, uint8_t nu
         // Iterate through all the sensor readings
         for(int i = 0; i < numOfSensors; i++)
         {
+            baseIdx = i * RGB_WS_LED_SIZE;
             wsLed.setId(i);
 
             // Check if the sensor is high or low
@@ -426,15 +432,15 @@ bool UnitController::setLightsFromSensorVals(uint8_t* sensorReadings, uint8_t nu
                 wsLed.setRgbValues(0, 255, 0);
             }
 
-            // Set the temporary light payload
-            m_tmpLightCtrlBuffer[i * RGB_WS_LED_SIZE]       = wsLed.getId();
-            m_tmpLightCtrlBuffer[(i * RGB_WS_LED_SIZE) + 1] = wsLed.getRedVal();
-            m_tmpLightCtrlBuffer[(i * RGB_WS_LED_SIZE) + 2] = wsLed.getGreenVal();
-            m_tmpLightCtrlBuffer[(i * RGB_WS_LED_SIZE) + 3] = wsLed.getBlueVal();
+            // Set the temporary light payload. Idx of light start from index 1 and upwards
+            m_tmpLightCtrlBuffer[baseIdx]                     = i + 1;
+            m_tmpLightCtrlBuffer[baseIdx + RGB_RED_BUF_POS]   = wsLed.getRedVal();
+            m_tmpLightCtrlBuffer[baseIdx + RGB_GREEN_BUF_POS] = wsLed.getGreenVal();
+            m_tmpLightCtrlBuffer[baseIdx + RGB_BLUE_BUF_POS]  = wsLed.getBlueVal();
         }
 
         // Transmit the data to the light controller
-        if(ptrLightCtrl->handlePut(m_tmpLightCtrlBuffer, NUM_OF_CUPS * RGB_WS_LED_SIZE) < 0)
+        if(ptrLightCtrl->handlePut(m_tmpLightCtrlBuffer, numOfSensors * RGB_WS_LED_SIZE) == BJ_FAILURE)
         {
 #ifndef UNIT_TESTING
             BJBP_LOG_ERR("Failed to transmit new sensor values to the light controller\n");

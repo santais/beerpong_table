@@ -33,6 +33,10 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/UnitController/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/UARTMessageController/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/Logger}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/Wire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/Wire/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/AdafruitPwmServo/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/EdgeLightController/src}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.cpp.sketch.input.1676605808" name="CPP source files" superClass="io.sloeber.compiler.cpp.sketch.input"/>
 							</tool>
@@ -44,6 +48,10 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/Logger/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/TimerOne}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/UARTMessageController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/Wire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/Wire/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/AdafruitPwmServo/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/EdgeLightController/src}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.c.sketch.input.1486778764" name="C Source Files" superClass="io.sloeber.compiler.c.sketch.input"/>
 							</tool>
@@ -56,6 +64,10 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/AdafruitNeoPixel}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/LightController}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/Logger/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/Wire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/Wire/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/AdafruitPwmServo/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/EdgeLightController/src}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.S.sketch.input.913084259" name="Assembly source files" superClass="io.sloeber.compiler.S.sketch.input"/>
 							</tool>

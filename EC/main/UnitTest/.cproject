@@ -21,6 +21,16 @@
 								<option id="io.sloeber.compiler.cpp.sketch.option.incpath.2016761877" name="Include Paths (-I)" superClass="io.sloeber.compiler.cpp.sketch.option.incpath" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/UnitTest/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/UnitTest/core/variant}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/UnitController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/AdafruitNeoPixel/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/CommonTypes/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/ControllerInterface/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/LightController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/SensorController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/sn74hc165/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/SystemController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/UARTMessageController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/EdgeLightController/src}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.cpp.sketch.input.666012183" name="CPP source files" superClass="io.sloeber.compiler.cpp.sketch.input"/>
 							</tool>
@@ -28,6 +38,16 @@
 								<option id="io.sloeber.compiler.c.sketch.option.incpath.638021947" name="Include Paths (-I)" superClass="io.sloeber.compiler.c.sketch.option.incpath" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/UnitTest/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/UnitTest/core/variant}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/UnitController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/AdafruitNeoPixel/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/CommonTypes/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/ControllerInterface/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/LightController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/SensorController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/sn74hc165/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/SystemController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/UARTMessageController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/EdgeLightController/src}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.c.sketch.input.904818064" name="C Source Files" superClass="io.sloeber.compiler.c.sketch.input"/>
 							</tool>
@@ -35,6 +55,16 @@
 								<option id="io.sloeber.compiler.asm.sketch.option.incpath.1976664404" name="Include Paths (-I)" superClass="io.sloeber.compiler.asm.sketch.option.incpath" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/UnitTest/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/UnitTest/core/variant}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/UnitController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/AdafruitNeoPixel/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/CommonTypes/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/ControllerInterface/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/LightController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/SensorController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/sn74hc165/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/SystemController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/UARTMessageController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/EdgeLightController/src}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.S.sketch.input.750422969" name="Assembly source files" superClass="io.sloeber.compiler.S.sketch.input"/>
 							</tool>
@@ -87,6 +117,16 @@
 								<option id="gnu.both.asm.option.include.paths.1796119316" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/UnitTest/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/UnitTest/core/variant}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/UnitController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/AdafruitNeoPixel/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/CommonTypes/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/ControllerInterface/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/LightController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/SensorController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/sn74hc165/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/SystemController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/UARTMessageController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/EdgeLightController/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/UnitTest/libraries/Logger}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/UnitTest/libraries/Logger/src}&quot;"/>
 								</option>
@@ -102,6 +142,16 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/test}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/UnitTest/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/UnitTest/core/variant}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/UnitController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/AdafruitNeoPixel/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/CommonTypes/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/ControllerInterface/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/LightController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/SensorController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/sn74hc165/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/SystemController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/UARTMessageController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/EdgeLightController/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/UnitTest/libraries/Logger}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/UnitTest/libraries/Logger/src}&quot;"/>
 								</option>
@@ -115,6 +165,16 @@
 								<option id="gnu.c.compiler.option.include.paths.710255744" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/UnitTest/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/UnitTest/core/variant}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/UnitController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/AdafruitNeoPixel/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/CommonTypes/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/ControllerInterface/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/LightController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/SensorController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/sn74hc165/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/SystemController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/UARTMessageController/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BeerpongEmbeddedController/libraries/EdgeLightController/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/UnitTest/libraries/Logger}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/UnitTest/libraries/Logger/src}&quot;"/>
 								</option>

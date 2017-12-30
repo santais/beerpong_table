@@ -25,8 +25,7 @@ namespace Controller
 //-------------------------------------------------------------------------------//
 // CONSTANTS
 //-------------------------------------------------------------------------------//
-const uint8_t LED_RGB_MAX_VAL           = 255u;
-const uint8_t RGB_BUF_START_INDEX       = 1u;
+
 
 //-------------------------------------------------------------------------------//
 // FUNCTIONS
@@ -152,6 +151,19 @@ void CupLight::setId(uint8_t id)
 }
 
 /**************************************************************/
+// Date: 30 Dec 2017
+// Function: CupLight::getId
+// Description: TODO
+// Inputs:
+// Output: TODO
+// Return: uint8_t
+/**************************************************************/
+uint8_t CupLight::getId()
+{
+    return m_id;
+}
+
+/**************************************************************/
 // Date: 15 Dec 2017
 // Function: CupLight::getWsRef
 // Description: TODO
@@ -201,7 +213,9 @@ LightController::LightController(uint8_t dataPin)
         }
     }
 
+#ifndef UNIT_TESTING
     m_ptrNeoPixelStrip->show();
+#endif
 }
 
 /**************************************************************/
@@ -227,39 +241,30 @@ LightController::~LightController()
 /**************************************************************/
 int LightController::handleGet(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
 {
-    int retVal = -1;
+    int retVal = BJ_SUCCESS;
     uint8_t cupId = 0;
 
-    if((ptrBuffer != NULL) && (ptrBytesWritten != NULL))
+    if((ptrBuffer == NULL) || (ptrBytesWritten == NULL))
     {
-        retVal = 0;
+#ifndef UNIT_TESTING
+        BJBP_LOG_ERR("Invalid input buffer or bytes written\n");
+#endif
+        retVal = BJ_FAILURE;
+    }
+
+    if(retVal == BJ_SUCCESS)
+    {
         cupId = ptrBuffer[0];
 
-        // Check the validity of the cup ID
-        if(cupId > (NUM_OF_CUPS - 1))
+        // Check if it's a get all request or just a single request
+        if(cupId == RGB_GET_ALL_VALUES_REQ)
         {
-#ifndef UNIT_TESTING
-            BJBP_LOG_ERR("Invalid cup ID %i", cupId);
-#endif
-            retVal = -1;
+            retVal = getAllRgbVal(ptrBuffer, ptrBytesWritten);
         }
         else
         {
-            // Set the RGB values starting from index 1
-            Ws2812Led* ptrWsLed = m_cupLights[cupId].getWsRef(retVal);
-            ptrBuffer[RGB_BUF_START_INDEX] = ptrWsLed->getRedVal();
-            ptrBuffer[RGB_BUF_START_INDEX + 1] = ptrWsLed->getGreenVal();
-            ptrBuffer[RGB_BUF_START_INDEX + 2] = ptrWsLed->getBlueVal();
-
-            // Set the bytes written to the size of all thre RGB values and the index
-            *ptrBytesWritten = RGB_WS_LED_SIZE;
+            retVal = getSingleRgbVal(ptrBuffer, ptrBytesWritten);
         }
-    }
-    else
-    {
-#ifndef UNIT_TESTING
-        BJBP_LOG_ERR("Invalid buffer input");
-#endif
     }
 
     return retVal;
@@ -278,12 +283,13 @@ int LightController::handlePut(uint8_t* ptrPayload, uint8_t payloadSize)
     int retVal = 0;
     uint8_t cupId = 0;
     uint8_t numOfLeds = payloadSize / RGB_WS_LED_SIZE;
+    uint8_t baseIdx = 0;
 
     // Retreive the values from the buffer
-    if(((payloadSize % RGB_WS_LED_SIZE) > 0) || (payloadSize == 0))
+    if(((payloadSize % RGB_WS_LED_SIZE) > 0) || (payloadSize == 0) || (ptrPayload == NULL))
     {
 #ifndef UNIT_TESTING
-        BJBP_LOG_ERR("Payloadsize exceeds maximum LEDs");
+        BJBP_LOG_ERR("Payloadsize exceeds maximum LEDs or input is NULL");
 #endif
         retVal = -1;
     }
@@ -291,19 +297,28 @@ int LightController::handlePut(uint8_t* ptrPayload, uint8_t payloadSize)
     {
         for(int i = 0; i < numOfLeds; i++)
         {
+            baseIdx = RGB_WS_LED_SIZE * i;
+
             // Get the RGB Reference
             // NOTE: Only 1 color is allowed per WS right now.
-            cupId = ptrPayload[(i * RGB_WS_LED_SIZE)];
+            cupId = ptrPayload[baseIdx];
 
-            for(unsigned int j = 0; j < LEDS_PER_CUP; j++)
+            if(cupId == RGB_GET_ALL_VALUES_REQ)
             {
-                Ws2812Led* ptrWsLed = m_cupLights[cupId].getWsRef(j);
+                retVal = BJ_FAILURE;
+            }
+            else
+            {
+                for(unsigned int j = 0; j < LEDS_PER_CUP; j++)
+                {
+                    Ws2812Led* ptrWsLed = m_cupLights[cupId].getWsRef(j);
 
-                ptrWsLed->setRgbValues(ptrPayload[(i * RGB_WS_LED_SIZE) + 1], ptrPayload[(i * RGB_WS_LED_SIZE) + 2],
-                        ptrPayload[(i * RGB_WS_LED_SIZE) + 3]);
+                    ptrWsLed->setRgbValues(ptrPayload[baseIdx + RGB_RED_BUF_POS], ptrPayload[baseIdx + RGB_GREEN_BUF_POS],
+                            ptrPayload[baseIdx + RGB_BLUE_BUF_POS]);
 
-                // Set the physical value of the neo pixel led
-                setNeoPixelLight(ptrWsLed, cupId);
+                    // Set the physical value of the neo pixel led
+                    setNeoPixelLight(ptrWsLed, m_cupLights[cupId].getId());
+                }
             }
 
             // DEBUG
@@ -334,12 +349,83 @@ int LightController::handlePut(uint8_t* ptrPayload, uint8_t payloadSize)
 void LightController::setNeoPixelLight(Ws2812Led* wsLed, uint8_t cupId)
 {
     // Set the start ring buffer. This is seen as an array of lights starting from cup 0.
+    // Note: CupId of cups are starting from 1 why 1 must be substracted
     uint16_t wsLedStartIdx = (LEDS_PER_CUP * cupId) + wsLed->getId() ;
 
     // Set neo pixel lights
 #ifndef UNIT_TESTING
     m_ptrNeoPixelStrip->setPixelColor(wsLedStartIdx, wsLed->getRedVal(), wsLed->getGreenVal(), wsLed->getBlueVal());
 #endif
+}
+
+/**************************************************************/
+// Date: 30 Dec 2017
+// Function: LightController::getSingleRgbVal
+// Description: TODO
+// Inputs: uint8_t*, uint8_t*
+// Output: TODO
+// Return: int16_t
+/**************************************************************/
+int16_t LightController::getSingleRgbVal(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
+{
+    int16_t retVal = BJ_SUCCESS;
+    uint8_t cupId = ptrBuffer[RGB_ID_BUF_POS];
+
+    if(cupId > (NUM_OF_CUPS - 1))
+    {
+        retVal = BJ_FAILURE;
+#ifndef UNIT_TESTING
+        BJBP_LOG_ERR("Invalid cup ID: %i\n", cupId);
+#endif
+    }
+    else
+    {
+        // Set the RGB values starting from index 1.
+        Ws2812Led* ptrWsLed = m_cupLights[cupId].getWsRef(0);
+        ptrBuffer[RGB_RED_BUF_POS]   = ptrWsLed->getRedVal();
+        ptrBuffer[RGB_GREEN_BUF_POS] = ptrWsLed->getGreenVal();
+        ptrBuffer[RGB_BLUE_BUF_POS]  = ptrWsLed->getBlueVal();
+
+        // Set the bytes written to the size of all thre RGB values and the index
+        *ptrBytesWritten = RGB_WS_LED_SIZE;
+    }
+
+    return retVal;
+}
+
+/**************************************************************/
+// Date: 30 Dec 2017
+// Function: LightController::getAllRgbVal
+// Description: TODO
+// Inputs: uint8_t*, uint8_t*
+// Output: TODO
+// Return: int16_t
+/**************************************************************/
+int16_t LightController::getAllRgbVal(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
+{
+    int16_t retVal = BJ_SUCCESS;
+    Ws2812Led* ptrWsLed = NULL;
+    uint8_t baseIdx = 0;
+
+    for(int i = 0; i < NUM_OF_CUPS; i++)
+    {
+        // Calculate the base index
+        baseIdx = RGB_WS_LED_SIZE * i;
+
+        // Get the WS light ref. Individual setting is not yet supported.
+        ptrWsLed = m_cupLights[i].getWsRef(0);
+
+        // Set the buffer value
+        ptrBuffer[baseIdx]                     = m_cupLights[i].getId();
+        ptrBuffer[RGB_RED_BUF_POS + baseIdx]   = ptrWsLed->getRedVal();
+        ptrBuffer[RGB_GREEN_BUF_POS + baseIdx] = ptrWsLed->getGreenVal();
+        ptrBuffer[RGB_BLUE_BUF_POS + baseIdx]  = ptrWsLed->getBlueVal();
+    }
+
+    // Set the bytes written to the size of all thre RGB values and the index
+    *ptrBytesWritten = RGB_WS_LED_SIZE * NUM_OF_CUPS;
+
+    return retVal;
 }
 
 };

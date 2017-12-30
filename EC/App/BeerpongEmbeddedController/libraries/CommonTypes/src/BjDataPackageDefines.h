@@ -41,9 +41,10 @@ enum class TargetModule
     E_MODULE_LIGHT              = 0x01,     /// Light controller request
     E_MODULE_SYSTEM             = 0x02,     /// System controller request
     E_MODULE_SENSOR             = 0x03,     /// Sensor controller request
+    E_MODULE_EDGE_LIGHT         = 0x04,     /// Edge light controller request
 
-    E_MODULE_PING               = 0x04,     /// Ping request
-    E_MODULE_LOG                = 0x05      /// Log request
+    E_MODULE_PING               = 0x05,     /// Ping request
+    E_MODULE_LOG                = 0x06      /// Log request
 };
 
 enum class RestRequest

@@ -16,6 +16,7 @@
 #include "IMessageController.h"
 #include "SystemController.h"
 #include "BjConfiguration.h"
+#include "EdgeLightController.h"
 
 using namespace BjDataPackageDefines;
 using namespace Controller;
@@ -151,3 +152,61 @@ TEST_F(UnitControllerFixture, ValidateLightSettings)
 
     EXPECT_TRUE(m_unitCtrl.checkSensorInput());
 }
+
+
+TEST_F(UnitControllerFixture, ValidatAllIndividualControllers)
+{
+    SystemController systemCtrl;
+    SensorController sensorCtrl(0, 0, 0, 0);
+    LightController lightCtrl(0);
+    EdgeLightController edgeLightCtrl(0, 0);
+
+    EXPECT_TRUE(m_unitCtrl.addController(sensorCtrl, TargetModule::E_MODULE_SENSOR));
+    EXPECT_TRUE(m_unitCtrl.addController(systemCtrl, TargetModule::E_MODULE_SYSTEM));
+    EXPECT_TRUE(m_unitCtrl.addController(lightCtrl, TargetModule::E_MODULE_LIGHT));
+    EXPECT_TRUE(m_unitCtrl.addController(edgeLightCtrl, TargetModule::E_MODULE_EDGE_LIGHT));
+}
+
+TEST_F(UnitControllerFixture, validateEdgeControlPkg)
+{
+    BjDataPackage bjDataPackage;
+    bjDataPackage.setRestRequest(RestRequest::E_GET_REQUEST);
+    bjDataPackage.setTargetModule(TargetModule::E_MODULE_EDGE_LIGHT);
+    bjDataPackage.setIpAddr(0);
+    uint8_t getPayload[4] = {1, 0, 0, 0};
+    bjDataPackage.setPayload(getPayload, 4);
+
+    SystemController systemCtrl;
+    SensorController sensorCtrl(0, 0, 0, 0);
+    LightController lightCtrl(0);
+    EdgeLightController edgeLightCtrl(0, 0);
+
+    EXPECT_TRUE(m_unitCtrl.addController(sensorCtrl, TargetModule::E_MODULE_SENSOR));
+    EXPECT_TRUE(m_unitCtrl.addController(systemCtrl, TargetModule::E_MODULE_SYSTEM));
+    EXPECT_TRUE(m_unitCtrl.addController(lightCtrl, TargetModule::E_MODULE_LIGHT));
+    EXPECT_TRUE(m_unitCtrl.addController(edgeLightCtrl, TargetModule::E_MODULE_EDGE_LIGHT));
+
+    EXPECT_TRUE(m_unitCtrl.sendPkgContentToController(bjDataPackage));
+}
+
+TEST_F(UnitControllerFixture, missingEdgeCtrlRegistration)
+{
+    BjDataPackage bjDataPackage;
+    bjDataPackage.setRestRequest(RestRequest::E_GET_REQUEST);
+    bjDataPackage.setTargetModule(TargetModule::E_MODULE_EDGE_LIGHT);
+    bjDataPackage.setIpAddr(0);
+    uint8_t getPayload[4] = {1, 0, 0, 0};
+    bjDataPackage.setPayload(getPayload, 4);
+
+    SystemController systemCtrl;
+    SensorController sensorCtrl(0, 0, 0, 0);
+    LightController lightCtrl(0);
+    EdgeLightController edgeLightCtrl(0, 0);
+
+    EXPECT_TRUE(m_unitCtrl.addController(sensorCtrl, TargetModule::E_MODULE_SENSOR));
+    EXPECT_TRUE(m_unitCtrl.addController(systemCtrl, TargetModule::E_MODULE_SYSTEM));
+    EXPECT_TRUE(m_unitCtrl.addController(lightCtrl, TargetModule::E_MODULE_LIGHT));
+
+    EXPECT_FALSE(m_unitCtrl.sendPkgContentToController(bjDataPackage));
+}
+

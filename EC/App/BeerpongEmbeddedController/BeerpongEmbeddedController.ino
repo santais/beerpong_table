@@ -29,6 +29,7 @@
 #include "BjDataPackageDefines.h"
 #include "BjConfiguration.h"
 #include "UnitController.h"
+#include "EdgeLightController.h"
 
 using namespace Controller;
 
@@ -53,6 +54,7 @@ const uint32_t ALIVE_LED_ISR_FREQ_US = (uint32_t) (((double) (1/ALIVE_LED_ISR_FR
 LightController* ptrLightCtrl;
 SystemController* ptrSystemCtrl;
 SensorController* ptrSensorCtrl;
+EdgeLightController* ptrEdgeLightCtrl;
 UARTMessageController* ptrUartMsgCtrl;
 UnitController* ptrUnitCtrl;
 
@@ -103,6 +105,7 @@ void setup()
 
     // Setup the controllers
     ptrLightCtrl = new LightController(WS2812_DATA_PIN_O);
+    ptrEdgeLightCtrl = new EdgeLightController(I2C_PWM_MOD_ADDR, I2C_PWM_FREQ_HZ);
     ptrSystemCtrl = new SystemController();
     ptrSensorCtrl = new SensorController(SN74HC165_CLK_PIN_O, SN74HC165_CLK_INH_PIN_O, SN74HC165_SDLD_PIN_O, SN74HC165_SER_PIN_I);
     ptrUartMsgCtrl = new UARTMessageController(UART_BAUD_RATE);
@@ -110,6 +113,7 @@ void setup()
 
     // Add the controllers
     initVal = ptrUnitCtrl->addController(*ptrLightCtrl, TargetModule::E_MODULE_LIGHT);
+    initVal = ptrUnitCtrl->addController(*ptrEdgeLightCtrl, TargetModule::E_MODULE_EDGE_LIGHT);
     initVal &= ptrUnitCtrl->addController(*ptrSystemCtrl, TargetModule::E_MODULE_SYSTEM);
     initVal &= ptrUnitCtrl->addController(*ptrSensorCtrl, TargetModule::E_MODULE_SENSOR);
 

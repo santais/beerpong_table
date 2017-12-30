@@ -34,8 +34,11 @@ namespace Controller
 const uint8_t RGB_WS_LED_SIZE           = 4;
 const uint8_t RGB_RED_BUF_POS           = 1;
 const uint8_t RGB_GREEN_BUF_POS         = 2;
+const uint8_t RGB_BLUE_BUF_POS          = 3;
 const uint8_t RGB_ID_BUF_POS            = 0;
+const uint8_t LED_RGB_MAX_VAL           = 255;
 
+const uint8_t RGB_GET_ALL_VALUES_REQ    = 255;
 //-------------------------------------------------------------------------------//
 // ENUM DECLARATION
 //-------------------------------------------------------------------------------//
@@ -96,6 +99,7 @@ public:
     CupLight(uint8_t id);
 
     void setId(uint8_t id);
+    uint8_t getId();
     Ws2812Led* getWsRef(uint8_t id);
 
 private:
@@ -116,6 +120,8 @@ public:
     virtual int handleDelete(uint8_t* ptrPayload, uint8_t payloadSize) {return 0;}
 private:
     void setNeoPixelLight(Ws2812Led* wsLed, uint8_t cupId);
+    int16_t getSingleRgbVal(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten);
+    int16_t getAllRgbVal(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten);
 
 #ifndef UNIT_TESTING
     Adafruit_NeoPixel* m_ptrNeoPixelStrip;

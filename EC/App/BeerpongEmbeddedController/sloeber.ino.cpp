@@ -2,7 +2,7 @@
 //This is a automatic generated file
 //Please do not modify this file
 //If you touch this file your change will be overwritten during the next build
-//This file has been generated on 2017-12-28 17:26:12
+//This file has been generated on 2017-12-30 23:24:38
 
 #include "Arduino.h"
 #include "stdint.h"
@@ -16,6 +16,7 @@
 #include "BjDataPackageDefines.h"
 #include "BjConfiguration.h"
 #include "UnitController.h"
+#include "EdgeLightController.h"
 
 void aliveLedISR(void) ;
 void setup() ;
