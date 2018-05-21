@@ -21,6 +21,7 @@
 #else
 #include <stddef.h>
 #include <string.h>
+#include <stdio.h>
 #endif
 
 namespace Controller
@@ -109,8 +110,6 @@ int SensorController::handleGet(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
         {
             *ptrBytesWritten = NUM_OF_SENSORS;
             retVal = 0;
-
-            // Overwrite old sensor values
         }
     }
 

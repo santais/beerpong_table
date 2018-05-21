@@ -113,7 +113,7 @@ void setup()
 
     // Add the controllers
     initVal = ptrUnitCtrl->addController(*ptrLightCtrl, TargetModule::E_MODULE_LIGHT);
-    initVal = ptrUnitCtrl->addController(*ptrEdgeLightCtrl, TargetModule::E_MODULE_EDGE_LIGHT);
+    initVal &= ptrUnitCtrl->addController(*ptrEdgeLightCtrl, TargetModule::E_MODULE_EDGE_LIGHT);
     initVal &= ptrUnitCtrl->addController(*ptrSystemCtrl, TargetModule::E_MODULE_SYSTEM);
     initVal &= ptrUnitCtrl->addController(*ptrSensorCtrl, TargetModule::E_MODULE_SENSOR);
 
