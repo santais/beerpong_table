@@ -14,16 +14,17 @@
 //-------------------------------------------------------------------------------//
 #include "sn74hc165.h"  
 #include "Arduino.h"    // pinMode and digitalWrite
+#include "BjConfiguration.h"
 #include <stdio.h>      // Printf
 #include <stdint.h>     // data types
 
 //-------------------------------------------------------------------------------//
 // DEFINES 
 //-------------------------------------------------------------------------------//
-#define defFREQ_MICRO_SECS   ((uint32_t) 1) // 1 MHz.
+#define PULSE_WIDTH_USEC     ((uint32_t) 15) // 1 MHz.
 
-#define defSHIFT_REG_BIT_RES ((uint8_t) 8)
-#define defSHIFT_MSB         ((uint8_t) 0x80)
+#define SHIFT_REG_BIT_RES ((uint8_t) 8)
+#define SHIFT_MSB         ((uint8_t) 0x80)
 
 //-------------------------------------------------------------------------------//
 // ENUM DECLARATION
@@ -37,7 +38,7 @@ static struct
     uint8_t ui8Clk;     // Clock Pin
     uint8_t ui8ClkInh;  // Clock INH pin
     uint8_t ui8SdLd;    // Latch Pin
-    uint8_t ui8Ser;     // data Pin
+    uint8_t ui8Qh;      // data Pin
 } stShiftRegPins;
 
 //-------------------------------------------------------------------------------//
@@ -53,14 +54,8 @@ static void vPulsePin(uint8_t ui8Pin, uint32_t ui32DelayUs);
 // FUNCTIONS
 //-------------------------------------------------------------------------------//
 
-/*********************************************************************************/
-// Description: 
-//                            
-// @param 
-// @return 1 on success, -1 on failure
-/*********************************************************************************/
 int8_t SN74HC165_Init(const uint8_t ui8ClkPin, const uint8_t ui8ClkInhPin, 
-    const uint8_t ui8ShLdPin, const uint8_t ui8SerPin)
+    const uint8_t ui8ShLdPin, const uint8_t ui8QhPin)
 {
     uint8_t ui8Return = 1;
     
@@ -68,13 +63,13 @@ int8_t SN74HC165_Init(const uint8_t ui8ClkPin, const uint8_t ui8ClkInhPin,
     stShiftRegPins.ui8Clk    = ui8ClkPin;
     stShiftRegPins.ui8ClkInh = ui8ClkInhPin;
     stShiftRegPins.ui8SdLd   = ui8ShLdPin;
-    stShiftRegPins.ui8Ser    = ui8SerPin;
+    stShiftRegPins.ui8Qh     = ui8QhPin;
 
     // Set the pin Modes
     pinMode(stShiftRegPins.ui8Clk, OUTPUT);
     pinMode(stShiftRegPins.ui8ClkInh, OUTPUT);
     pinMode(stShiftRegPins.ui8SdLd, OUTPUT);
-    pinMode(stShiftRegPins.ui8Ser, INPUT);
+    pinMode(stShiftRegPins.ui8Qh, INPUT);
 
     // Reset all pinmode states
     digitalWrite(stShiftRegPins.ui8Clk, LOW);
@@ -84,12 +79,6 @@ int8_t SN74HC165_Init(const uint8_t ui8ClkPin, const uint8_t ui8ClkInhPin,
     return ui8Return;
 }
 
-/*********************************************************************************/
-// Description: 
-//                            
-// @param 
-// @return 1 on success, -1 on failure
-/*********************************************************************************/
 void SN74HC165_Read(uint8_t *uip8Buffer, uint8_t ui8BufSize)
 {
     uint8_t ui8ShiftRegIdx = 0;
@@ -97,17 +86,9 @@ void SN74HC165_Read(uint8_t *uip8Buffer, uint8_t ui8BufSize)
     uint8_t ui8Data = 0;    
 
     // Set the latch bit low, so no the memory register is cleared
-/*
     digitalWrite(stShiftRegPins.ui8SdLd, LOW);
-    digitalWrite(stShiftRegPins.ui8ClkInh, HIGH);
-    delayMicroseconds(defFREQ_MICRO_SECS);
-*/
-
-    digitalWrite(stShiftRegPins.ui8ClkInh, HIGH);
-    digitalWrite(stShiftRegPins.ui8SdLd, LOW);
-    delayMicroseconds(defFREQ_MICRO_SECS);
+    delayMicroseconds(PULSE_WIDTH_USEC);
     digitalWrite(stShiftRegPins.ui8SdLd, HIGH);
-    digitalWrite(stShiftRegPins.ui8ClkInh, LOW);
 
     // Shift 8 bits at a time to the shift register
     for(ui8ShiftRegIdx = 0; ui8ShiftRegIdx < ui8BufSize; ui8ShiftRegIdx++)
@@ -118,28 +99,26 @@ void SN74HC165_Read(uint8_t *uip8Buffer, uint8_t ui8BufSize)
 
         // Shift the bits in one bit a time. Every rising clock of SrClk
         // will shift the next bit in
-        for(i8Bits = 0; i8Bits < defSHIFT_REG_BIT_RES; i8Bits++)
+        for(i8Bits = 0; i8Bits < SHIFT_REG_BIT_RES; i8Bits++)
         {
-            ui8Data = digitalRead(stShiftRegPins.ui8Ser);
+            ui8Data = digitalRead(stShiftRegPins.ui8Qh);
             
-            uip8Buffer[ui8ShiftRegIdx] |= (ui8Data << ((defSHIFT_REG_BIT_RES - 1) - i8Bits));
+#ifdef DEBUG
+            Serial.print(ui8Data);
+#endif
 
-            //uip8Buffer[ui8ShiftRegIdx] |= (digitalRead(stShiftRegPins.ui8Ser));
+            uip8Buffer[ui8ShiftRegIdx] |= (ui8Data << ((SHIFT_REG_BIT_RES - 1) - i8Bits));
 
             // Pulse Clock to 
-            vPulsePin(stShiftRegPins.ui8Clk, defFREQ_MICRO_SECS);
+            vPulsePin(stShiftRegPins.ui8Clk, PULSE_WIDTH_USEC);
         }
 
-        //Serial.printf("Read a byte %x\n", uip8Buffer[ui8ShiftRegIdx]);
     }
 
-    digitalWrite(stShiftRegPins.ui8ClkInh, HIGH);
+#ifdef DEBUG
+    Serial.println();
+#endif
 
-    // Set the latch pin high so the memory register is stored.
-    //digitalWrite(stShiftRegPins.ui8SdLd, LOW);
-    //digitalWrite(stShiftRegPins.ui8ClkInh, HIGH);
-
-    //Serial.println("done read");
 }
 
 /*********************************************************************************/

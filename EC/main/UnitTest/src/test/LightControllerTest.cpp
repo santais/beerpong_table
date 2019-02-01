@@ -52,9 +52,9 @@ TEST_F(LightControllerFixture, ValidateNullInput)
     uint8_t payloadBytesRead = 10;
 
     // Get the payload
-    EXPECT_EQ(BJ_FAILURE, m_lightCtrl.handleGet(NULL, &payloadBytesRead));
-    EXPECT_EQ(BJ_FAILURE, m_lightCtrl.handleGet(payload, NULL));
-    EXPECT_EQ(BJ_SUCCESS, m_lightCtrl.handleGet(payload, &payloadBytesRead));
+    EXPECT_EQ(BJ_FAILURE, m_lightCtrl.read(NULL, &payloadBytesRead));
+    EXPECT_EQ(BJ_FAILURE, m_lightCtrl.read(payload, NULL));
+    EXPECT_EQ(BJ_SUCCESS, m_lightCtrl.read(payload, &payloadBytesRead));
 }
 
 TEST_F(LightControllerFixture, CupIdTooLarge)
@@ -62,7 +62,7 @@ TEST_F(LightControllerFixture, CupIdTooLarge)
     uint8_t payload[4] = {NUM_OF_CUPS, 0, 0, 0};
     uint8_t payloadBytesRead = 0;
 
-    EXPECT_EQ(-1, m_lightCtrl.handleGet(payload, &payloadBytesRead));
+    EXPECT_EQ(BJ_FAILURE, m_lightCtrl.read(payload, &payloadBytesRead));
 }
 
 TEST_F(LightControllerFixture, CupIdMaxBoundary)
@@ -70,7 +70,7 @@ TEST_F(LightControllerFixture, CupIdMaxBoundary)
     uint8_t payload[4] = {NUM_OF_CUPS - 1, 0, 0, 0};
     uint8_t payloadBytesRead = 0;
 
-    EXPECT_EQ(0, m_lightCtrl.handleGet(payload, &payloadBytesRead));
+    EXPECT_EQ(BJ_SUCCESS, m_lightCtrl.read(payload, &payloadBytesRead));
 }
 
 TEST_F(LightControllerFixture, InvalidPutModulusSize)
@@ -78,10 +78,10 @@ TEST_F(LightControllerFixture, InvalidPutModulusSize)
     uint8_t payload[3] = {NUM_OF_CUPS - 1, 0, 0};
     uint8_t payloadSize = 3;
 
-    EXPECT_EQ(-1, m_lightCtrl.handlePut(payload, payloadSize));
-    EXPECT_EQ(-1, m_lightCtrl.handlePut(payload, payloadSize - 1));
-    EXPECT_EQ(-1, m_lightCtrl.handlePut(payload, payloadSize - 2));
-    EXPECT_EQ(-1, m_lightCtrl.handlePut(payload, payloadSize - 3));
+    EXPECT_EQ(BJ_FAILURE, m_lightCtrl.write(payload, payloadSize));
+    EXPECT_EQ(BJ_FAILURE, m_lightCtrl.write(payload, payloadSize - 1));
+    EXPECT_EQ(BJ_FAILURE, m_lightCtrl.write(payload, payloadSize - 2));
+    EXPECT_EQ(BJ_FAILURE, m_lightCtrl.write(payload, payloadSize - 3));
 
 }
 
@@ -94,11 +94,11 @@ TEST_F(LightControllerFixture, SetAndGetTest)
     uint8_t payload[4] = {1, 0, 0, 0};
 
     // Set the payload of light 0 and 10
-    EXPECT_EQ(BJ_SUCCESS, m_lightCtrl.handlePut(cupIdPayloadOne, payloadSize));
-    EXPECT_EQ(BJ_SUCCESS, m_lightCtrl.handlePut(cupIdPayloadTen, payloadSize));
+    EXPECT_EQ(BJ_SUCCESS, m_lightCtrl.write(cupIdPayloadOne, payloadSize));
+    EXPECT_EQ(BJ_SUCCESS, m_lightCtrl.write(cupIdPayloadTen, payloadSize));
 
     // Get the payload of cup 0 and validate
-    EXPECT_EQ(BJ_SUCCESS, m_lightCtrl.handleGet(payload, &payloadBytesRead));
+    EXPECT_EQ(BJ_SUCCESS, m_lightCtrl.read(payload, &payloadBytesRead));
     EXPECT_EQ(4, payloadBytesRead);
 
     // Validate the contents for cup 0
@@ -109,7 +109,7 @@ TEST_F(LightControllerFixture, SetAndGetTest)
 
     // Get the payload of cup 10 and validate
     payload[0] = 10;
-    EXPECT_EQ(0, m_lightCtrl.handleGet(payload, &payloadBytesRead));
+    EXPECT_EQ(0, m_lightCtrl.read(payload, &payloadBytesRead));
     EXPECT_EQ(4, payloadBytesRead);
 
     // Validate the contents for cup 10
@@ -119,12 +119,29 @@ TEST_F(LightControllerFixture, SetAndGetTest)
     }
 }
 
+TEST_F(LightControllerFixture, SetAndGetIndexZero)
+{
+    uint8_t cupIdPayload[4] = {0, 200, 100, 50};
+    uint8_t payloadSize = 4;
+    uint8_t payloadBytesRead = 0;
+    uint8_t payload[4] = {0, 0, 0, 0};
+
+    // Set the payload of light 0
+    EXPECT_EQ(BJ_SUCCESS, m_lightCtrl.write(cupIdPayload, payloadSize));
+
+    // Get the payload
+    EXPECT_EQ(BJ_SUCCESS, m_lightCtrl.read(payload, &payloadBytesRead));
+    EXPECT_TRUE(0 == std::memcmp(cupIdPayload, payload, sizeof(payload)));
+
+}
+
 TEST_F(LightControllerFixture, SetAndGetAll)
 {
     uint8_t cupIdPayload[4] = {0, 0, 0, 0};
     uint8_t cupIdGetAll[NUM_OF_CUPS * RGB_WS_LED_SIZE] = {0};
     uint8_t payloadRead = 0;
     uint8_t baseIdx = 0;
+    const uint8_t expectedReadAllCupsPayload = 80;
 
     // Put the values of all cups
     for(int i = 0; i < NUM_OF_CUPS; i++)
@@ -137,14 +154,14 @@ TEST_F(LightControllerFixture, SetAndGetAll)
         cupIdPayload[2] = i + 6;
         cupIdPayload[3] = i + 7;
 
-        EXPECT_EQ(BJ_SUCCESS, m_lightCtrl.handlePut(cupIdPayload, 4));
+        EXPECT_EQ(BJ_SUCCESS, m_lightCtrl.write(cupIdPayload, 4));
     }
 
 
     // Get all the values of all cups
     cupIdGetAll[0] = RGB_GET_ALL_VALUES_REQ;
-    EXPECT_EQ(BJ_SUCCESS, m_lightCtrl.handleGet(cupIdGetAll, &payloadRead));
-    EXPECT_EQ(88, payloadRead);
+    EXPECT_EQ(BJ_SUCCESS, m_lightCtrl.read(cupIdGetAll, &payloadRead));
+    EXPECT_EQ(expectedReadAllCupsPayload, payloadRead);
 
     // Verify that the get values are correct
     for(int i = 0; i < NUM_OF_CUPS; i++)

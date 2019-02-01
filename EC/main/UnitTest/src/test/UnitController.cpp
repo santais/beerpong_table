@@ -10,6 +10,7 @@
 
 #include <string.h>
 #include <vector>
+#include <stdio.h>
 
 #include "BjDataPackage.h"
 #include "UnitController.h"
@@ -125,7 +126,7 @@ TEST_F(UnitControllerFixture, ValidateValidSensorCtrlCheck)
     EXPECT_TRUE(m_unitCtrl.addController(sensorCtrl, TargetModule::E_MODULE_SENSOR));
     EXPECT_TRUE(m_unitCtrl.addController(systemCtrl, TargetModule::E_MODULE_SYSTEM));
 
-    EXPECT_TRUE(m_unitCtrl.checkSensorInput());
+    EXPECT_TRUE(m_unitCtrl.readAndSetSensorInput());
 }
 
 TEST_F(UnitControllerFixture, ValidateInvalidSensorCtrlCheck)
@@ -134,7 +135,7 @@ TEST_F(UnitControllerFixture, ValidateInvalidSensorCtrlCheck)
 
     EXPECT_TRUE(m_unitCtrl.addController(systemCtrl, TargetModule::E_MODULE_SYSTEM));
 
-    EXPECT_FALSE(m_unitCtrl.checkSensorInput());
+    EXPECT_FALSE(m_unitCtrl.readAndSetSensorInput());
 }
 
 TEST_F(UnitControllerFixture, ValidateLightSettings)
@@ -150,7 +151,7 @@ TEST_F(UnitControllerFixture, ValidateLightSettings)
     // Change the sensor readings to trigger a light set
     sensorCtrl.testSensorReadings[0] = 1;
 
-    EXPECT_TRUE(m_unitCtrl.checkSensorInput());
+    EXPECT_TRUE(m_unitCtrl.readAndSetSensorInput());
 }
 
 
@@ -210,3 +211,29 @@ TEST_F(UnitControllerFixture, missingEdgeCtrlRegistration)
     EXPECT_FALSE(m_unitCtrl.sendPkgContentToController(bjDataPackage));
 }
 
+TEST_F(UnitControllerFixture, convertByteToBinary)
+{
+    uint8_t byteArray[2] = {194, 15};
+    char binaries[2 * 8] = {};
+
+    m_unitCtrl.convertByteToBinary(byteArray, binaries, 2);
+
+    char expectedBinaries[2 * 8] = {0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0};
+    EXPECT_TRUE( 0 == std::memcmp(binaries, expectedBinaries, sizeof(binaries)));
+}
+
+TEST_F(UnitControllerFixture, sensorLightInput)
+{
+    SystemController systemCtrl;
+    SensorController sensorCtrl(0, 0, 0, 0);
+    LightController lightCtrl(0);
+
+    uint8_t sensorReadings[2] = {194, 15};
+
+    EXPECT_TRUE(m_unitCtrl.addController(sensorCtrl, TargetModule::E_MODULE_SENSOR));
+    EXPECT_TRUE(m_unitCtrl.addController(systemCtrl, TargetModule::E_MODULE_SYSTEM));
+    EXPECT_TRUE(m_unitCtrl.addController(lightCtrl, TargetModule::E_MODULE_LIGHT));
+
+    m_unitCtrl.setLightsFromSensorVals(sensorReadings, 20);
+
+}

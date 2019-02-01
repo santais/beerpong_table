@@ -2,7 +2,7 @@
 //This is a automatic generated file
 //Please do not modify this file
 //If you touch this file your change will be overwritten during the next build
-//This file has been generated on 2018-05-07 22:46:39
+//This file has been generated on 2019-01-29 19:18:07
 
 #include "Arduino.h"
 #include "stdint.h"
@@ -21,6 +21,8 @@
 void aliveLedISR(void) ;
 void setup() ;
 void loop() ;
+void testSerialInput() ;
+void printSensorData(uint8_t* sensorData, uint8_t numOfSensors) ;
 
 #include "BeerpongEmbeddedController.ino"
 

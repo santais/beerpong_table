@@ -45,8 +45,8 @@ TEST_F(SystemControllerFixture, ValidateNullInput)
     uint8_t payloadBytesRead = 10;
 
     // Get the payload
-    EXPECT_EQ(-1, m_systemCtrl.handleGet(NULL, &payloadBytesRead));;
-    EXPECT_EQ(0, m_systemCtrl.handleGet(payload, &payloadBytesRead));
+    EXPECT_EQ(-1, m_systemCtrl.read(NULL, &payloadBytesRead));;
+    EXPECT_EQ(0, m_systemCtrl.read(payload, &payloadBytesRead));
 }
 
 TEST_F(SystemControllerFixture, InvalidInput)
@@ -55,7 +55,7 @@ TEST_F(SystemControllerFixture, InvalidInput)
     uint8_t payloadSize = 1;
 
     // Set the payload
-    EXPECT_EQ(-1, m_systemCtrl.handlePut(&payload, payloadSize));
+    EXPECT_EQ(-1, m_systemCtrl.write(&payload, payloadSize));
 }
 
 TEST_F(SystemControllerFixture, ValidInput)
@@ -64,7 +64,7 @@ TEST_F(SystemControllerFixture, ValidInput)
     uint8_t payloadSize = 1;
 
     // Set the payload
-    EXPECT_EQ(0, m_systemCtrl.handlePut(&payload, payloadSize));
+    EXPECT_EQ(0, m_systemCtrl.write(&payload, payloadSize));
 }
 
 TEST_F(SystemControllerFixture, ValidatePutAndGet)
@@ -74,10 +74,10 @@ TEST_F(SystemControllerFixture, ValidatePutAndGet)
     uint8_t payloadBytesRead = 0;
 
     // Set the payload
-    EXPECT_EQ(0, m_systemCtrl.handlePut(&payload, payloadSize));
+    EXPECT_EQ(0, m_systemCtrl.write(&payload, payloadSize));
 
     // Get the payload
-    EXPECT_EQ(0, m_systemCtrl.handleGet(&payload, &payloadBytesRead));
+    EXPECT_EQ(0, m_systemCtrl.read(&payload, &payloadBytesRead));
     EXPECT_EQ(1, payloadBytesRead);
     EXPECT_EQ(ControllerState::E_STATE_AUTOMATIC, (ControllerState) payload);
 }

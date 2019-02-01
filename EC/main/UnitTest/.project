@@ -42,6 +42,11 @@
 			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/arduino/hardware/avr/1.6.20/variants/mega</locationURI>
 		</link>
 		<link>
+			<name>libraries/Logger</name>
+			<type>2</type>
+			<locationURI>ECLIPSE_HOME/arduinoPlugin/libraries/Logger/1.0.3</locationURI>
+		</link>
+		<link>
 			<name>src/CommonTypes</name>
 			<type>2</type>
 			<location>/Users/markpovlsen/Documents/BeerpongTableProject/beerpong_table/EC/App/BeerpongEmbeddedController/libraries/CommonTypes</location>

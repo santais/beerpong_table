@@ -95,8 +95,8 @@ void setup()
     pinMode(BOARD_ALIVE_LED_PIN_O, OUTPUT);
 
     // Initialize ALIVE LED timer
-    Timer1.initialize(ALIVE_LED_ISR_FREQ_US);
-    Timer1.attachInterrupt(aliveLedISR);
+   // Timer1.initialize(ALIVE_LED_ISR_FREQ_US);
+    //Timer1.attachInterrupt(aliveLedISR);
 
     pinMode(7, INPUT);
 
@@ -107,7 +107,7 @@ void setup()
     ptrLightCtrl = new LightController(WS2812_DATA_PIN_O);
     ptrEdgeLightCtrl = new EdgeLightController(I2C_PWM_MOD_ADDR, I2C_PWM_FREQ_HZ);
     ptrSystemCtrl = new SystemController();
-    ptrSensorCtrl = new SensorController(SN74HC165_CLK_PIN_O, SN74HC165_CLK_INH_PIN_O, SN74HC165_SDLD_PIN_O, SN74HC165_SER_PIN_I);
+    ptrSensorCtrl = new SensorController(SN74HC165_CLK_PIN_O, SN74HC165_CLK_INH_PIN_O, SN74HC165_SDLD_PIN_O, SN74HC165_QH_PIN   );
     ptrUartMsgCtrl = new UARTMessageController(UART_BAUD_RATE);
     ptrUnitCtrl = new UnitController(*ptrUartMsgCtrl);
 
@@ -120,6 +120,9 @@ void setup()
     if(initVal)
     {
         BJBP_LOG_INFO("Arduino successfully setup\n");
+
+        ptrLightCtrl->runLedTestProgram();
+        ptrUnitCtrl->run(true);
     }
     else
     {
@@ -135,8 +138,38 @@ void setup()
 /*********************************************************************************/
 void loop()
 {
-    ptrUnitCtrl->run();
+    ptrUnitCtrl->run(false);
 
     delay(10);
 }
 
+void testSerialInput() {
+    uint8_t tmpSensorReadings[NUM_OF_SENSORS] = {};
+    uint8_t bytesWritten = 0;
+    if(ptrSensorCtrl->read(tmpSensorReadings, &bytesWritten) < 0)
+    {
+        Serial.println("Failed to get data");
+    }
+    else if(bytesWritten < NUM_OF_SENSORS)
+    {
+        Serial.println("Read more data than number of sensors");
+    }
+    else
+    {
+       //printSensorData(tmpSensorReadings, NUM_OF_SENSORS);
+    }
+}
+
+void printSensorData(uint8_t* sensorData, uint8_t numOfSensors) {
+    String dataOutputMessage = "";
+
+    for(int i = 0; i < numOfSensors; i++) {
+        dataOutputMessage.concat("Sensor: ");
+        dataOutputMessage.concat(i);
+        dataOutputMessage.concat(" value is: ");
+        dataOutputMessage.concat(sensorData[i]);
+        dataOutputMessage.concat('\n');
+    }
+
+    Serial.println(dataOutputMessage);
+}

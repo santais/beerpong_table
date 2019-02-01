@@ -30,7 +30,9 @@
 #ifndef UNIT_TESTING
 #include "Logger.h"
 #else
+#include <math.h>
 #include <string.h>
+#include <iostream>
 #endif
 
 using namespace BjDataPackageDefines;
@@ -62,14 +64,6 @@ namespace Controller
 // FUNCTIONS
 //-------------------------------------------------------------------------------//
 
-/**************************************************************/
-// Date: 16 Dec 2017
-// Function: UnitController::UnitController
-// Description: TODO
-// Inputs: IMessageController&
-// Output: TODO
-// Return:
-/**************************************************************/
 UnitController::UnitController(IMessageController& messageCtrl) : m_ptrMessageCtrl(&messageCtrl)
 {
     for(int i = 0; i < MAX_NUM_CONTROLLERS; i++)
@@ -77,64 +71,39 @@ UnitController::UnitController(IMessageController& messageCtrl) : m_ptrMessageCt
         m_controllerObjs[i] = NULL;
     }
 
-    memset(m_sensorValues, 0x0, NUM_OF_SENSORS);
+    memset(m_sensorValueShiftReg, 0x0, NUM_OF_SENSORS);
+    memset(m_sensorBinaryValues, 0x0, SENSOR_READINGS_REQUIRED);
 }
 
-/**************************************************************/
-// Date: 16 Dec 2017
-// Function: fhdUnitController::~UnitController
-// Description: TODO
-// Inputs:
-// Output: TODO
-// Return:
-/**************************************************************/
 UnitController::~UnitController()
 {
 
 }
 
-/**************************************************************/
-// Date: 16 Dec 2017
-// Function: UnitController::run
-// Description: TODO
-// Inputs:
-// Output: TODO
-// Return: void
-/**************************************************************/
-bool UnitController::run()
+bool UnitController::run(bool initRun)
 {
-    bool retVal = true;
+    bool retVal = readAndSetSensorInput();
+    if(retVal || initRun)
+    {
+        retVal = handleSensorUpdate(m_sensorValueShiftReg, NUM_OF_CUPS, initRun);
+    }
 
-    // Check for any updates of the Sensor controller
-    retVal = checkSensorInput();
-
-    // Check for any new data input
     retVal &= checkInputData();
 
     return retVal;
 }
 
-/**************************************************************/
-// Date: 16 Dec 2017
-// Function: UnitController::addController
-// Description: TODO
-// Inputs: IRestController&, TargetModule
-// Output: TODO
-// Return: bool
-/**************************************************************/
 bool UnitController::addController(IRestController& restController, TargetModule module)
 {
     bool retVal = false;
 
-    // Find an available slot
     for(int i = 0; i < MAX_NUM_CONTROLLERS; i++)
     {
         if(m_controllerObjs[i] == NULL)
         {
-            // Add the new controller
             m_controllerObjs[i] = new ControllerObj(restController, module);
 
-#ifndef UNIT_TESTING
+#ifdef DEBUG
             BJBP_LOG_INFO("Added controller ID %i\n", module);
 #endif
 
@@ -147,14 +116,6 @@ bool UnitController::addController(IRestController& restController, TargetModule
 }
 
 
-/**************************************************************/
-// Date: 16 Dec 2017
-// Function: UnitController::getRestCtrlRef
-// Description: TODO
-// Inputs: TargetModule
-// Output: TODO
-// Return: IRestController*
-/**************************************************************/
 IRestController* UnitController::getRestCtrlRef(TargetModule targetModule)
 {
     IRestController* ptrRestCtrl = NULL;
@@ -163,7 +124,6 @@ IRestController* UnitController::getRestCtrlRef(TargetModule targetModule)
     {
         if(m_controllerObjs[i] != NULL)
         {
-            // Check if the target module is the same
             if(targetModule == m_controllerObjs[i]->getTargetModule())
             {
                 ptrRestCtrl = m_controllerObjs[i]->getRestCtrlRef();
@@ -175,14 +135,6 @@ IRestController* UnitController::getRestCtrlRef(TargetModule targetModule)
     return ptrRestCtrl;
 }
 
-/**************************************************************/
-// Date: 16 Dec 2017
-// Function: UnitController::sendPkgContentToController
-// Description: TODO
-// Inputs: BjDataPackage&
-// Output: TODO
-// Return: bool
-/**************************************************************/
 bool UnitController::sendPkgContentToController(BjDataPackage& bjDataPkg)
 {
     bool retVal = false;
@@ -191,7 +143,6 @@ bool UnitController::sendPkgContentToController(BjDataPackage& bjDataPkg)
 
     ptrRestCtrl = getRestCtrlRef(bjDataPkg.getTargetModule());
 
-    // check what REST command that was instantiated
     if(ptrRestCtrl != NULL)
     {
         retVal = true;
@@ -199,20 +150,21 @@ bool UnitController::sendPkgContentToController(BjDataPackage& bjDataPkg)
         switch(restReqest)
         {
         case RestRequest::E_GET_REQUEST:
-            ptrRestCtrl->handleGet(bjDataPkg.getPayload(NULL), &bytesWritten);
+            ptrRestCtrl->read(bjDataPkg.getPayload(NULL), &bytesWritten);
 
             if(bytesWritten < 1)
             {
-#ifndef UNIT_TESTING
+#ifdef DEBUG
                 BJBP_LOG_ERR("Failed to GET data");
 #endif
+                retVal = false;
             }
             break;
         case RestRequest::E_PUT_REQUEST:
-            ptrRestCtrl->handlePut(bjDataPkg.getPayload(NULL), bjDataPkg.getRawPayloadSize());
+            ptrRestCtrl->write(bjDataPkg.getPayload(NULL), bjDataPkg.getRawPayloadSize());
             break;
         default:
-#ifndef UNIT_TESTING
+#ifdef DEBUG
             BJBP_LOG_ERR("Unsupported REST command");
 #endif
             retVal = false;
@@ -224,14 +176,6 @@ bool UnitController::sendPkgContentToController(BjDataPackage& bjDataPkg)
 
 }
 
-/**************************************************************/
-// Date: 16 Dec 2017
-// Function: UnitController::returnPingRequest
-// Description: TODO
-// Inputs: BjDataPackage&
-// Output: TODO
-// Return: void
-/**************************************************************/
 void UnitController::returnPingRequest(BjDataPackage& bjDataPkg)
 {
     uint8_t ptrPayload = ARDUINO_CTRL_ID;
@@ -239,20 +183,12 @@ void UnitController::returnPingRequest(BjDataPackage& bjDataPkg)
 
     if(m_ptrMessageCtrl->write(bjDataPkg.getRawPayload(), bjDataPkg.getRawPayloadSize()) < (int) bjDataPkg.getRawPayloadSize())
     {
-#ifndef UNIT_TESTING
+#ifdef DEBUG
         BJBP_LOG_ERR("Failed to return ping request");
 #endif
     }
 }
 
-/**************************************************************/
-// Date: 27 Dec 2017
-// Function: UnitController::checkInputData
-// Description: TODO
-// Inputs:
-// Output: TODO
-// Return: bool
-/**************************************************************/
 bool UnitController::checkInputData()
 {
     bool retVal = true;
@@ -263,18 +199,15 @@ bool UnitController::checkInputData()
     dataBytesRead = m_ptrMessageCtrl->dataAvailable();
     if(dataBytesRead)
     {
-        // Retrieve the data
         dataBytesRead = m_ptrMessageCtrl->readBytes(&m_tmpPkgBuffer[0], dataBytesRead);
     }
 
-    // Check if the data was read successfully. If so, create a BJ package for further processing
     if(dataBytesRead)
     {
 #endif
         BjDataPackage bjDataPackage;
         bjDataPackage.setPkgFromRawPayload(m_tmpPkgBuffer, dataBytesRead);
 
-        // Send the package to the corresponding controller
         retVal = sendPkgContentToController(bjDataPackage);
 #ifndef UNIT_TESTING
     }
@@ -282,66 +215,53 @@ bool UnitController::checkInputData()
     return retVal;
 }
 
-/**************************************************************/
-// Date: 27 Dec 2017
-// Function: UnitController::checkSensorInput
-// Description: TODO
-// Inputs:
-// Output: TODO
-// Return: bool
-/**************************************************************/
-bool UnitController::checkSensorInput()
+bool UnitController::readAndSetSensorInput()
 {
     bool retVal = false;
     bool sensorUpdate = false;
-    uint8_t newSensorRead = false;
 
     IRestController* ptrSensorCtrl = getRestCtrlRef(TargetModule::E_MODULE_SENSOR);
     if(ptrSensorCtrl != NULL)
     {
-        uint8_t tmpSensorReadings[NUM_OF_SENSORS] = {};
+        uint8_t tmpSensorReadings[NUM_OF_SHIFT_REG] = {};
         uint8_t bytesWritten = 0;
-        if(ptrSensorCtrl->handleGet(tmpSensorReadings, &bytesWritten) < 0)
+        if(ptrSensorCtrl->read(tmpSensorReadings, &bytesWritten) < 0)
         {
-#ifndef UNIT_TESTING
+#ifdef DEBUG
             BJBP_LOG_ERR("Failed to get sensor readings");
 #endif
         }
-        else if(bytesWritten < NUM_OF_SENSORS)
+        else if(bytesWritten < NUM_OF_SHIFT_REG)
         {
-#ifndef UNIT_TESTING
+#ifdef DEBUG
             BJBP_LOG_ERR("Incorrect number of sensors read: %i", bytesWritten);
 #endif
         }
         else
         {
-            retVal = true;
-
-            // Compare the readings with the latest values
-            for(int i = 0; i < NUM_OF_SENSORS; i++)
+            for(int i = 0; i < NUM_OF_SHIFT_REG; i++)
             {
-                if(m_sensorValues[i] != tmpSensorReadings[i])
+  //              Serial.println(m_sensorValueShiftReg[i]);
+   //             delay(1000);
+                if(m_sensorValueShiftReg[i] != tmpSensorReadings[i])
                 {
                     sensorUpdate = true;
-                    break;
                 }
             }
 
-            // Handle the sensor update and copy the newly read sensor data into the stored datas
             if(sensorUpdate)
             {
-#ifndef UNIT_TESTING
+#ifdef DEBUG
                 BJBP_LOG_INFO("New sensor readings! \n");
 #endif
-
-                memcpy(m_sensorValues, tmpSensorReadings, NUM_OF_SENSORS);
-                retVal = handleSensorUpdate(m_sensorValues, NUM_OF_CUPS - 1);
+                retVal = true;
+                memcpy(m_sensorValueShiftReg, tmpSensorReadings, NUM_OF_SHIFT_REG);
             }
         }
     }
     else
     {
-#ifndef UNIT_TESTING
+#ifdef DEBUG
       BJBP_LOG_ERR("Sensor controller not found");
 #endif
         retVal = false;
@@ -350,28 +270,18 @@ bool UnitController::checkSensorInput()
     return retVal;
 }
 
-/**************************************************************/
-// Date: 27 Dec 2017
-// Function: UnitController::handleSensorUpdate
-// Description: TODO
-// Inputs:
-// Output: TODO
-// Return: bool
-/**************************************************************/
-bool UnitController::handleSensorUpdate(uint8_t* sensorReadings, uint8_t numOfSensors)
+bool UnitController::handleSensorUpdate(uint8_t* sensorReadings, uint8_t numOfSensors, bool initRun)
 {
     bool retVal = true;
 
-    // Check the state of the system controller
     IRestController* ptrSystemCtrl = getRestCtrlRef(TargetModule::E_MODULE_SYSTEM);
     if(ptrSystemCtrl != NULL)
     {
         uint8_t systemState = 0;
 
-        // Get the system state
-        if(ptrSystemCtrl->handleGet(&systemState, NULL) < 0)
+        if(ptrSystemCtrl->read(&systemState, NULL) < 0)
         {
-#ifndef UNIT_TESTING
+#ifdef DEBUG
             BJBP_LOG_ERR("Failed to get system state");
 #endif
             retVal = false;
@@ -380,13 +290,13 @@ bool UnitController::handleSensorUpdate(uint8_t* sensorReadings, uint8_t numOfSe
         {
             if(static_cast<ControllerState>(systemState) == ControllerState::E_STATE_AUTOMATIC)
             {
-               retVal = setLightsFromSensorVals(sensorReadings, numOfSensors);
+               retVal = setLightsFromSensorVals(sensorReadings, numOfSensors, initRun);
             }
         }
     }
     else
     {
-#ifndef UNIT_TESTING
+#ifdef DEBUG
         BJBP_LOG_ERR("System Controller not found");
 #endif
         retVal = false;
@@ -395,68 +305,93 @@ bool UnitController::handleSensorUpdate(uint8_t* sensorReadings, uint8_t numOfSe
     return retVal;
 }
 
-/**************************************************************/
-// Date: 27 Dec 2017
-// Function: UnitController::setLightsFromSensorVals
-// Description: TODO
-// Inputs: uint8_t*, uint8_t
-// Output: TODO
-// Return: fhdrbool
-/**************************************************************/
-bool UnitController::setLightsFromSensorVals(uint8_t* sensorReadings, uint8_t numOfSensors)
+bool UnitController::setLightsFromSensorVals(uint8_t* sensorReadings, uint8_t numOfSensors, bool initRun)
 {
     bool retVal = true;
     uint8_t baseIdx = 0;
 
-    // Get the Light controller reference if it exists
     IRestController* ptrLightCtrl = getRestCtrlRef(TargetModule::E_MODULE_LIGHT);
-    if((ptrLightCtrl != NULL) && (numOfSensors < NUM_OF_CUPS))
+    if((ptrLightCtrl != NULL) && (numOfSensors == NUM_OF_CUPS))
     {
-        Ws2812Led wsLed;
+        static char sensorBinaryValues[SENSOR_READINGS_REQUIRED] = {};
+        convertByteToBinary(sensorReadings, sensorBinaryValues, SHIFT_REG_REQUIRED);
 
-        // Iterate through all the sensor readings
-        for(int i = 0; i < numOfSensors; i++)
+
+        Serial.print("Sensor member: ");
+        for(int cupId = 0; cupId < numOfSensors; cupId++)
         {
-            baseIdx = i * RGB_WS_LED_SIZE;
-            wsLed.setId(i);
-
-            // Check if the sensor is high or low
-            if(sensorReadings[i])
-            {
-                // Set red MAX value
-                wsLed.setRgbValues(255, 0, 0);
-            }
-            else
-            {
-                // Set green MAX value
-                wsLed.setRgbValues(0, 255, 0);
-            }
-
-            // Set the temporary light payload. Idx of light start from index 1 and upwards
-            m_tmpLightCtrlBuffer[baseIdx]                     = i + 1;
-            m_tmpLightCtrlBuffer[baseIdx + RGB_RED_BUF_POS]   = wsLed.getRedVal();
-            m_tmpLightCtrlBuffer[baseIdx + RGB_GREEN_BUF_POS] = wsLed.getGreenVal();
-            m_tmpLightCtrlBuffer[baseIdx + RGB_BLUE_BUF_POS]  = wsLed.getBlueVal();
+            Serial.print((int) m_sensorBinaryValues[cupId]);
         }
 
-        // Transmit the data to the light controller
-        if(ptrLightCtrl->handlePut(m_tmpLightCtrlBuffer, numOfSensors * RGB_WS_LED_SIZE) == BJ_FAILURE)
+        Serial.println();
+
+        Serial.print("Sensor new   : ");
+        for(int cupId = 0; cupId < numOfSensors; cupId++)
         {
-#ifndef UNIT_TESTING
-            BJBP_LOG_ERR("Failed to transmit new sensor values to the light controller\n");
-#endif
+            Serial.print((int) sensorBinaryValues[cupId]);
+        }
+
+        Serial.println();
+
+        delay(100);
+
+        for(int cupId = 0; cupId < numOfSensors; cupId++)
+        {
+            Ws2812Led wsLed;
+
+            baseIdx = cupId * RGB_WS_LED_SIZE;
+            wsLed.setId(cupId);
+
+            if((sensorBinaryValues[cupId] != m_sensorBinaryValues[cupId]) || (initRun))
+            {
+                if(sensorBinaryValues[cupId])
+                {
+                    static_cast<LightController*>(ptrLightCtrl)->runCupRemovedSequence(cupId);
+                    wsLed.setRgbValues(0, LED_RGB_MAX_VAL, 0);
+                }
+                else
+                {
+                    wsLed.setRgbValues(LED_RGB_MAX_VAL, 0, 0);
+                }
+
+                m_tmpLightCtrlBuffer[baseIdx] = cupId;
+                m_tmpLightCtrlBuffer[baseIdx + RGB_RED_BUF_POS] = wsLed.getRedVal();
+                m_tmpLightCtrlBuffer[baseIdx + RGB_GREEN_BUF_POS] = wsLed.getGreenVal();
+                m_tmpLightCtrlBuffer[baseIdx + RGB_BLUE_BUF_POS] = wsLed.getBlueVal();
+            }
+        }
+
+        if(ptrLightCtrl->write(m_tmpLightCtrlBuffer, numOfSensors * RGB_WS_LED_SIZE) == BJ_FAILURE)
+        {
+    #ifdef DEBUG
+        BJBP_LOG_ERR("Failed to transmit new sensor values to the light controller\n");
+    #endif
             retVal = false;
         }
+
+        memcpy(m_sensorBinaryValues, sensorBinaryValues, SENSOR_READINGS_REQUIRED);
     }
     else
     {
-#ifndef UNIT_TESTING
+#ifdef DEBUG
       BJBP_LOG_ERR("Light Controller not found or sensors out of bound %i\n", numOfSensors);
 #endif
         retVal = false;
     }
 
     return retVal;
+}
+
+void UnitController::convertByteToBinary(uint8_t* inputBytes, char* outputBinaries, uint8_t byteSize)
+{
+    for(int i = 0; i < byteSize; i++)
+    {
+        uint8_t startIndex = i * BITS_PER_SHIFT_REG;
+        for(int j = 0; j < BITS_PER_SHIFT_REG; j++)
+        {
+            outputBinaries[startIndex + j] = ((inputBytes[i] & (1 << j)) != 0);
+        }
+    }
 }
 
 };

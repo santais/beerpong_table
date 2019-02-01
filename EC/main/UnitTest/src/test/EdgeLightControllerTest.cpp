@@ -50,8 +50,8 @@ TEST_F(EdgeLightControllerFixture, validateNullInput)
     uint8_t payloadBytesRead = 10;
 
     // Get the payload
-    EXPECT_EQ(-1, m_edgeLightCtrl.handleGet(NULL, &payloadBytesRead));
-    EXPECT_EQ(0, m_edgeLightCtrl.handleGet(payload, &payloadBytesRead));
+    EXPECT_EQ(-1, m_edgeLightCtrl.read(NULL, &payloadBytesRead));
+    EXPECT_EQ(0, m_edgeLightCtrl.read(payload, &payloadBytesRead));
 }
 
 TEST_F(EdgeLightControllerFixture, calcPwmOnTimeMin)
@@ -102,10 +102,10 @@ TEST_F(EdgeLightControllerFixture, SetandGetSingle)
     uint8_t payloadOne[4] = {1, 55, 120, 241};
     uint8_t bytesRead = 0;
 
-    EXPECT_EQ(m_edgeLightCtrl.handlePut(payloadZero, 4), BJ_SUCCESS);
+    EXPECT_EQ(m_edgeLightCtrl.write(payloadZero, 4), BJ_SUCCESS);
 
     // Get the ID again
-    EXPECT_EQ(m_edgeLightCtrl.handleGet(payloadZero, &bytesRead), BJ_SUCCESS);
+    EXPECT_EQ(m_edgeLightCtrl.read(payloadZero, &bytesRead), BJ_SUCCESS);
     EXPECT_EQ(bytesRead, 4);
 
     // Check individual values
@@ -113,10 +113,10 @@ TEST_F(EdgeLightControllerFixture, SetandGetSingle)
     EXPECT_EQ(payloadZero[2], 200);
     EXPECT_EQ(payloadZero[3], 123);
 
-    EXPECT_EQ(m_edgeLightCtrl.handlePut(payloadOne, 4), BJ_SUCCESS);
+    EXPECT_EQ(m_edgeLightCtrl.write(payloadOne, 4), BJ_SUCCESS);
 
     // Get the ID again
-    EXPECT_EQ(m_edgeLightCtrl.handleGet(payloadOne, &bytesRead), BJ_SUCCESS);
+    EXPECT_EQ(m_edgeLightCtrl.read(payloadOne, &bytesRead), BJ_SUCCESS);
     EXPECT_EQ(bytesRead, 4);
 
     // Check individual values
@@ -130,13 +130,13 @@ TEST_F(EdgeLightControllerFixture, SetAndGetInvalidId)
     uint8_t payload[4] = {0, 100, 200, 123};
     uint8_t bytesRead = 0;
 
-    EXPECT_EQ(m_edgeLightCtrl.handlePut(payload, 4), BJ_SUCCESS);
+    EXPECT_EQ(m_edgeLightCtrl.write(payload, 4), BJ_SUCCESS);
 
     // Set invalid id
     payload[0] = 3;
 
     // Get the ID again
-    EXPECT_EQ(m_edgeLightCtrl.handleGet(payload, &bytesRead), BJ_FAILURE);
+    EXPECT_EQ(m_edgeLightCtrl.read(payload, &bytesRead), BJ_FAILURE);
     EXPECT_EQ(bytesRead, 0);
 }
 
@@ -157,13 +157,13 @@ TEST_F(EdgeLightControllerFixture, SetAndGetAll)
         tmpPayload[2] = i + 5;
         tmpPayload[3] = i + 6;
 
-        EXPECT_EQ(m_edgeLightCtrl.handlePut(tmpPayload, 4), BJ_SUCCESS);
+        EXPECT_EQ(m_edgeLightCtrl.write(tmpPayload, 4), BJ_SUCCESS);
 
     }
 
     // Get all the values
     payload[0] = RGB_GET_ALL_VALUES_REQ;
-    EXPECT_EQ(m_edgeLightCtrl.handleGet(&payload[0], &bytesRead), BJ_SUCCESS);
+    EXPECT_EQ(m_edgeLightCtrl.read(&payload[0], &bytesRead), BJ_SUCCESS);
     EXPECT_EQ(bytesRead, NUM_EDGE_LEDS * RGB_WS_LED_SIZE);
 
     for(int i = 0; i < NUM_EDGE_LEDS; i++)

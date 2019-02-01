@@ -52,10 +52,8 @@ public:
             uint8_t serPin);
     virtual ~SensorController();
 
-    virtual int handleGet(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten);
-    virtual int handlePut(uint8_t* ptrPayload, uint8_t payloadSize) {return 0;}
-    virtual int handlePost(uint8_t* ptrPayload, uint8_t payloadSize) {return 0;}
-    virtual int handleDelete(uint8_t* ptrPayload, uint8_t payloadSize) {return 0;}
+    virtual int read(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten);
+    virtual int write(uint8_t* ptrPayload, uint8_t payloadSize) {return 0;}
 
     //uint8_t readNumOfHighBits(CupSide eCupSide);
 
@@ -66,8 +64,10 @@ public:
 #else
 private:
 #endif
+    uint8_t m_numOfShiftReg;
+
     //uint8_t getNumOfHighBits(uint8_t ui8Data);
-    bool readRawBits(uint8_t* payload, uint8_t numOfShiftReg);
+    bool readRawBits(uint8_t* payload);
 };
 
 };

@@ -60,55 +60,32 @@ namespace Controller
 // FUNCTIONS
 //-------------------------------------------------------------------------------//
 
-/**************************************************************/
-// Date: 14 Dec 2017
-// Function: SensorController::SensorController
-// Description: TODO
-// Inputs: stShiftRegPins_t*
-// Output: TODO
-// Return:
-/**************************************************************/
 SensorController::SensorController(uint8_t clkPin, uint8_t clkInhPin, uint8_t sdLdPin,
-        uint8_t serPin)
+        uint8_t qhPin) :
+        m_numOfShiftReg(NUM_OF_SHIFT_REG)
 {
     // Setup the setup the C driver
 #ifndef UNIT_TESTING
-    SN74HC165_Init(clkPin, clkInhPin, sdLdPin, serPin);
+    SN74HC165_Init(clkPin, clkInhPin, sdLdPin, qhPin);
 #else
     memset(testSensorReadings, 0x0, NUM_OF_SENSORS);
 #endif
 }
 
-/**************************************************************/
-// Date: 14 Dec 2017
-// Function: fhdrSensorController::~SensorController
-// Description: TODO
-// Inputs:
-// Output: TODO
-// Return:
-/**************************************************************/
 SensorController::~SensorController()
 {
 
 }
 
-/**************************************************************/
-// Date: 14 Dec 2017
-// Function: SensorController::handleGet
-// Description: TODO
-// Inputs: uint8_t*, uint8_t*
-// Output: TODO
-// Return: fhdrint
-/**************************************************************/
-int SensorController::handleGet(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
+int SensorController::read(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
 {
     int retVal = -1;
 
     if(ptrBuffer != NULL)
     {
-        if(readRawBits(ptrBuffer, NUM_OF_SHIFT_REG))
+        if(readRawBits(ptrBuffer))
         {
-            *ptrBytesWritten = NUM_OF_SENSORS;
+            *ptrBytesWritten = m_numOfShiftReg;
             retVal = 0;
         }
     }
@@ -117,44 +94,21 @@ int SensorController::handleGet(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
 }
 
 
-/**************************************************************/
-// Date: 17 Dec 2017
-// Function: SensorController::readRawBits
-// Description: TODO
-// Inputs: uint8_t*, uint8_t
-// Output: TODO
-// Return: bool
-/**************************************************************/
-bool SensorController::readRawBits(uint8_t* payload, uint8_t numOfShiftReg)
+bool SensorController::readRawBits(uint8_t* payload)
 {
     bool retVal = true;
 
-    if(numOfShiftReg > NUM_OF_SHIFT_REG)
-    {
-        retVal = false;
-    }
-    else
-    {
-        // Read the values
+    // Read the values
 #ifndef UNIT_TESTING
-        SN74HC165_Read(payload, numOfShiftReg);
+    SN74HC165_Read(payload, m_numOfShiftReg);
 #else
-        memcpy(payload, testSensorReadings, numOfShiftReg * BITS_PER_SHIFT_REG);
+    memcpy(payload, testSensorReadings, m_numOfShiftReg * BITS_PER_SHIFT_REG);
 #endif
-    }
+
 
     return retVal;
 }
 
-
-/**************************************************************/
-// Date: 14 Dec 2017
-// Function: SensorController::readActiveSensor
-// Description: TODO
-// Inputs: eCupSide_t
-// Output: TODO
-// Return: uint8_t
-/**************************************************************/
 // TODO: Move to the Android side
 /*uint8_t SensorController::readNumOfHighBits(CupSide eCupSide)
 {
@@ -185,14 +139,7 @@ bool SensorController::readRawBits(uint8_t* payload, uint8_t numOfShiftReg)
 	return ui8ActiveSensor;
 }
 */
-/**************************************************************/
-// Date: 14 Dec 2017
-// Function: SensorController::getNumOfHighBits
-// Description: TODO
-// Inputs: uint8_t
-// Output: TODO
-// Return: fhdruint8_t
-/**************************************************************/
+
 // TODO: Move to the Android side
 /*uint8_t SensorController::getNumOfHighBits(uint8_t ui8Data)
 {

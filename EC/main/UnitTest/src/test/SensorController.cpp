@@ -50,12 +50,12 @@ TEST_F(SensorControllerFixture, CheckOnSensorChange)
     uint8_t newSensorValues[NUM_OF_SENSORS] = {};
     uint8_t bytesWritten = 0;
 
-    m_sensorCtrl.handleGet(sensorValues, &bytesWritten);
+    m_sensorCtrl.read(sensorValues, &bytesWritten);
 
     // Set the sensor values
     m_sensorCtrl.testSensorReadings[0] = 1;
 
-    m_sensorCtrl.handleGet(newSensorValues, &bytesWritten);
+    m_sensorCtrl.read(newSensorValues, &bytesWritten);
 
     EXPECT_FALSE(0 == std::memcmp(sensorValues, newSensorValues, sizeof(sensorValues)));
 }
@@ -65,12 +65,12 @@ TEST_F(SensorControllerFixture, CheckSensorPattern)
     SensorController m_sensorCtrl(0, 0, 0, 0);
     uint8_t bytesWritten = 0;
 
-    uint8_t sensorPattern[NUM_OF_SENSORS] = {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0};
+    uint8_t sensorPattern[NUM_OF_SENSORS] = {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0};
     uint8_t sensorReading[NUM_OF_SENSORS] = {};
 
     std::copy(std::begin(sensorPattern), std::end(sensorPattern), std::begin(m_sensorCtrl.testSensorReadings));
 
-    m_sensorCtrl.handleGet(sensorReading, &bytesWritten);
+    m_sensorCtrl.read(sensorReading, &bytesWritten);
 
     EXPECT_TRUE(0 == std::memcmp(sensorPattern, sensorReading, sizeof(sensorPattern)));
 }
@@ -81,7 +81,7 @@ TEST_F(SensorControllerFixture, CheckBytesWritten)
 
     uint8_t sensorValues[NUM_OF_SENSORS] = {};
     uint8_t bytesWritten = 0;
-    m_sensorCtrl.handleGet(sensorValues, &bytesWritten);
+    m_sensorCtrl.read(sensorValues, &bytesWritten);
 
     EXPECT_EQ(NUM_OF_SENSORS, bytesWritten);
 }

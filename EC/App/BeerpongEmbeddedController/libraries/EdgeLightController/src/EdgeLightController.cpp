@@ -90,7 +90,7 @@ EdgeLightController::~EdgeLightController()
 // Output: TODO
 // Return: int
 /**************************************************************/
-int EdgeLightController::handleGet(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
+int EdgeLightController::read(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
 {
     int retVal = BJ_SUCCESS;
 
@@ -127,7 +127,7 @@ int EdgeLightController::handleGet(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
 // Output: TODO
 // Return: fhdrint
 /**************************************************************/
-int EdgeLightController::handlePut(uint8_t* ptrPayload, uint8_t payloadSize)
+int EdgeLightController::write(uint8_t* ptrPayload, uint8_t payloadSize)
 {
     int retVal = BJ_SUCCESS;
     uint8_t numOfLeds = 0;

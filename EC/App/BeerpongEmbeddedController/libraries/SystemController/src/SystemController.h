@@ -52,10 +52,8 @@ public:
     SystemController();
     virtual ~SystemController();
 
-    virtual int handleGet(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten);
-    virtual int handlePut(uint8_t* ptrPayload, uint8_t payloadSize);
-    virtual int handlePost(uint8_t* ptrPayload, uint8_t payloadSize) {return 0;}
-    virtual int handleDelete(uint8_t* ptrPayload, uint8_t payloadSize) {return 0;}
+    virtual int read(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten);
+    virtual int write(uint8_t* ptrPayload, uint8_t payloadSize);
 
     ControllerState getCtrlState() {return m_ctrlState;}
 private:

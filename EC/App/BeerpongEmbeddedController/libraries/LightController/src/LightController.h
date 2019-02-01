@@ -114,15 +114,19 @@ public:
     LightController(uint8_t dataPin);
     virtual ~LightController();
 
-    virtual int handleGet(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten);
-    virtual int handlePut(uint8_t* ptrPayload, uint8_t payloadSize);
-    virtual int handlePost(uint8_t* ptrPayload, uint8_t payloadSize) {return 0;}
-    virtual int handleDelete(uint8_t* ptrPayload, uint8_t payloadSize) {return 0;}
+    virtual int read(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten);
+    virtual int write(uint8_t* ptrPayload, uint8_t payloadSize);
+    void runCupRemovedSequence(uint8_t cupId);
+    void runLedTestProgram();
+
+
 private:
+    void setTestProgramColor(uint8_t redColor, uint8_t greenColor, uint8_t blueColor);
     void setNeoPixelLight(Ws2812Led* wsLed, uint8_t cupId);
+    void rainbowCycle(uint8_t wait, uint16_t cycles);
+    uint32_t wheel(byte WheelPos);
     int16_t getSingleRgbVal(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten);
     int16_t getAllRgbVal(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten);
-
 #ifndef UNIT_TESTING
     Adafruit_NeoPixel* m_ptrNeoPixelStrip;
 #endif

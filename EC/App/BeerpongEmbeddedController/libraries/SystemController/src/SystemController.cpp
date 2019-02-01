@@ -44,41 +44,17 @@ namespace Controller
 // CLASS
 //--------------------------------------------------- ----------------------------//
 
-/**************************************************************/
-// Date: 14 Dec 2017
-// Function: SystemController::SystemController
-// Description: TODO
-// Inputs:
-// Output: TODO
-// Return:
-/**************************************************************/
 SystemController::SystemController() : m_ctrlState(ControllerState::E_STATE_AUTOMATIC)
 {
 
 }
 
-/**************************************************************/
-// Date: 14 Dec 2017
-// Function: SystemController::~SystemController
-// Description: TODO
-// Inputs:
-// Output: TODO
-// Return:
-/**************************************************************/
 SystemController::~SystemController()
 {
 
 }
 
-/**************************************************************/
-// Date: 14 Dec 2017
-// Function: SystemController::handleGet
-// Description: TODO
-// Inputs: uint8_t*, uint8_t*
-// Output: TODO
-// Return: bool
-/**************************************************************/
-int SystemController::handleGet(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
+int SystemController::read(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
 {
     int retVal = -1;
 
@@ -86,11 +62,9 @@ int SystemController::handleGet(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
     {
         retVal = 0;
 
-        // Set the payload
         ptrBuffer[0] = (uint8_t) m_ctrlState;
     }
 
-    // Bytes Written is not mandatory
     if(ptrBytesWritten != NULL)
     {
         *ptrBytesWritten = 1;
@@ -99,15 +73,7 @@ int SystemController::handleGet(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
     return retVal;
 }
 
-/**************************************************************/
-// Date: 14 Dec 2017
-// Function: SystemController::handlePut
-// Description: TODO
-// Inputs: uint8_t*, uint8_t
-// Output: TODO
-// Return: void
-/**************************************************************/
-int SystemController::handlePut(uint8_t* ptrPayload, uint8_t payloadSize)
+int SystemController::write(uint8_t* ptrPayload, uint8_t payloadSize)
 {
     int retVal = 0;
 
@@ -119,7 +85,7 @@ int SystemController::handlePut(uint8_t* ptrPayload, uint8_t payloadSize)
         }
         else
         {
-#ifndef UNIT_TESTING
+#ifdef DEBUG
             BJBP_LOG_ERR("Invalid Controller State");
 #endif
             retVal = -1;
@@ -127,7 +93,7 @@ int SystemController::handlePut(uint8_t* ptrPayload, uint8_t payloadSize)
     }
     else
     {
-#ifndef UNIT_TESTING
+#ifdef DEBUG
         BJBP_LOG_ERR("NULL Ptr");
 #endif
         retVal = -1;
@@ -136,21 +102,13 @@ int SystemController::handlePut(uint8_t* ptrPayload, uint8_t payloadSize)
     return retVal;
 }
 
-/**************************************************************/
-// Date: 14 Dec 2017
-// Function: SystemController::checkValidSetRequest
-// Description: TODO
-// Inputs: uint8_t
-// Output: TODO
-// Return: fbool
-/**************************************************************/
 bool SystemController::checkValidSetRequest(uint8_t ui8ControlState)
 {
     bool bReturn = true;
 
     if(ui8ControlState > (uint8_t) ControllerState::E_STATE_SEQUENCE)
     {
-#ifndef UNIT_TESTING
+#ifdef DEBUG
         BJBP_LOG_ERR("SC - INVALID SET REQUEST OF SIZE: %u\n", ui8ControlState);
 #endif
         bReturn = false;

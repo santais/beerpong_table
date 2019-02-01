@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------//
+    //--------------------------------------------------------------------------------//
 //	Name: 
 //	Date: 04-10-16
 //	Author: Mark Ulletved Povlsen
@@ -52,8 +52,9 @@ public:
     virtual ~UnitController();
     UnitController(IMessageController& messageCtrl);
 
-    bool run();
+    bool run(bool initRun);
     bool addController(IRestController& restController, TargetModule module);
+    bool readAndSetSensorInput();
 
 #ifndef UNIT_TESTING
 private:
@@ -80,10 +81,9 @@ public:
     bool sendPkgContentToController(BjDataPackage& bjDataPkg);
     void returnPingRequest(BjDataPackage& bjDataPkg);
     bool checkInputData();
-    bool checkSensorInput();
-    bool handleSensorUpdate(uint8_t* sensorReadings, uint8_t numOfSensors);
-    bool setLightsFromSensorVals(uint8_t* sensorReadings, uint8_t numOfSensors);
-
+    bool handleSensorUpdate(uint8_t* sensorReadings, uint8_t numOfSensors, bool initRun);
+    bool setLightsFromSensorVals(uint8_t* sensorReadings, uint8_t numOfSensors, bool initRun);
+    void convertByteToBinary(uint8_t* inputBytes, char* outputBinaries, uint8_t byteSize);
     // Internal member variables
     IMessageController* m_ptrMessageCtrl;
     ControllerObj* m_controllerObjs[MAX_NUM_CONTROLLERS];
@@ -91,7 +91,8 @@ public:
     // Temporary data containers
     uint8_t m_tmpPkgBuffer[MAX_PACKAGE_SIZE];
     uint8_t m_tmpLightCtrlBuffer[NUM_OF_CUPS * RGB_WS_LED_SIZE];
-    uint8_t m_sensorValues[NUM_OF_SENSORS];
+    uint8_t m_sensorValueShiftReg[NUM_OF_SHIFT_REG];
+    char m_sensorBinaryValues[SENSOR_READINGS_REQUIRED];
 };
 
 };

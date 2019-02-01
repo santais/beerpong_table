@@ -37,64 +37,27 @@ RgbLeds::RgbLeds(uint8_t redVal, uint8_t greenVal, uint8_t blueVal) :
 
 }
 
-/**************************************************************/
-// Date: 16 Dec 2017
-// Function: Ws2812Led::Ws2812Led
-// Description: TODO
-// Inputs:
-// Output: TODO
-// Return:
-/**************************************************************/
+/** WS2812LED **/
+
 Ws2812Led::Ws2812Led() : m_id(0), RgbLeds(0, 0, 0)
 {
 
 }
-/**************************************************************/
-// Date: 15 Dec 2017
-// Function: Ws2812Led::Ws2812Led
-// Description: TODO
-// Inputs: uint8_t, uint8_t, uint8_t, uint8_t
-// Output: TODO
-// Return:
-/**************************************************************/
+
 Ws2812Led::Ws2812Led(uint8_t id, uint8_t redVal, uint8_t greenVal, uint8_t blueVal) :
     m_id(id), RgbLeds(redVal, greenVal, blueVal)
 {}
 
-/**************************************************************/
-// Date: 15 Dec 2017
-// Function: Ws2812Led::getId
-// Description: TODO
-// Inputs:
-// Output: TODO
-// Return: fhdruint8_t
-/**************************************************************/
 uint8_t Ws2812Led::getId()
 {
     return m_id;
 }
 
-/**************************************************************/
-// Date: 15 Dec 2017
-// Function: Ws2812Led::setId
-// Description: TODO
-// Inputs: int
-// Output: TODO
-// Return: void
-/**************************************************************/
 void Ws2812Led::setId(int id)
 {
     m_id = id;
 }
 
-/**************************************************************/
-// Date: 15 Dec 2017
-// Function: Ws2812Led::setRgbValues
-// Description: TODO
-// Inputs: uint8_t, uint8_t, uint8_t
-// Output: TODO
-// Return: void
-/**************************************************************/
 void Ws2812Led::setRgbValues(uint8_t redVal, uint8_t greenVal, uint8_t blueVal)
 {
     m_redval = redVal;
@@ -102,75 +65,35 @@ void Ws2812Led::setRgbValues(uint8_t redVal, uint8_t greenVal, uint8_t blueVal)
     m_blueVal = blueVal;
 }
 
+/** CupLight **/
 
-/**************************************************************/
-// Date: 15 Dec 2017
-// Function: CupLight::CupLight
-// Description: TODO
-// Inputs:
-// Output: TODO
-// Return:
-/**************************************************************/
 CupLight::CupLight() : m_id(0)
 {
 
 }
 
-/**************************************************************/
-// Date: 15 Dec 2017
-// Function: CupLight::CupLight
-// Description: TODO
-// Inputs: uint8_t
-// Output: TODO
-// Return:
-/**************************************************************/
 CupLight::CupLight(uint8_t id) : m_id(id)
 {
     uint8_t cupIdItr = 0;
 
-    // Iterate through all the lights and initialize them
     for(Ws2812Led& led : m_WsLeds)
     {
         led.setId(cupIdItr);
-        led.setRgbValues(LED_RGB_MAX_VAL, 0, 0);
+        led.setRgbValues(0, LED_RGB_MAX_VAL, 0);
         cupIdItr++;
     }
 }
 
-/**************************************************************/
-// Date: 15 Dec 2017
-// Function: CupLight::setId
-// Description: TODO
-// Inputs: uint8_t
-// Output: TODO
-// Return: fhdrvoid
-/**************************************************************/
 void CupLight::setId(uint8_t id)
 {
     m_id = id;
 }
 
-/**************************************************************/
-// Date: 30 Dec 2017
-// Function: CupLight::getId
-// Description: TODO
-// Inputs:
-// Output: TODO
-// Return: uint8_t
-/**************************************************************/
 uint8_t CupLight::getId()
 {
     return m_id;
 }
 
-/**************************************************************/
-// Date: 15 Dec 2017
-// Function: CupLight::getWsRef
-// Description: TODO
-// Inputs: uint8_t
-// Output: TODO
-// Return: Ws2812Led*
-/**************************************************************/
 Ws2812Led* CupLight::getWsRef(uint8_t id)
 {
     Ws2812Led* ptrWsLed = NULL;
@@ -183,14 +106,8 @@ Ws2812Led* CupLight::getWsRef(uint8_t id)
     return ptrWsLed;
 }
 
-/**************************************************************/
-// Date: 15 Dec 2017
-// Function: LightController::LightController
-// Description: TODO
-// Inputs: uint8_t
-// Output: TODO
-// Return:
-/**************************************************************/
+/** LightController **/
+
 LightController::LightController(uint8_t dataPin)
 #ifndef UNIT_TESTING
 : m_ptrNeoPixelStrip(NULL)
@@ -201,12 +118,10 @@ LightController::LightController(uint8_t dataPin)
     m_ptrNeoPixelStrip->begin();
 #endif
 
-    // Initialize all the cups
     for(unsigned int i = 0; i < NUM_OF_CUPS; i++)
     {
         m_cupLights[i] = CupLight(i);
 
-        // Set the color
         for(unsigned int j = 0; j < LEDS_PER_CUP; j++)
         {
             setNeoPixelLight(m_cupLights[i].getWsRef(j), i);
@@ -218,35 +133,19 @@ LightController::LightController(uint8_t dataPin)
 #endif
 }
 
-/**************************************************************/
-// Date: 15 Dec 2017
-// Function: LightController::~LightController
-// Description: TODO
-// Inputs:
-// Output: TODO
-// Return:
-/**************************************************************/
 LightController::~LightController()
 {
 
 }
 
-/**************************************************************/
-// Date: 15 Dec 2017
-// Function: LightController::handleGet
-// Description: TODO
-// Inputs: uint8_t*, uint8_t*
-// Output: TODO
-// Return: int
-/**************************************************************/
-int LightController::handleGet(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
+int LightController::read(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
 {
     int retVal = BJ_SUCCESS;
     uint8_t cupId = 0;
 
     if((ptrBuffer == NULL) || (ptrBytesWritten == NULL))
     {
-#ifndef UNIT_TESTING
+#ifdef DEBUG
         BJBP_LOG_ERR("Invalid input buffer or bytes written\n");
 #endif
         retVal = BJ_FAILURE;
@@ -254,9 +153,8 @@ int LightController::handleGet(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
 
     if(retVal == BJ_SUCCESS)
     {
-        cupId = ptrBuffer[0];
+        cupId = ptrBuffer[RGB_ID_BUF_POS];
 
-        // Check if it's a get all request or just a single request
         if(cupId == RGB_GET_ALL_VALUES_REQ)
         {
             retVal = getAllRgbVal(ptrBuffer, ptrBytesWritten);
@@ -270,28 +168,19 @@ int LightController::handleGet(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
     return retVal;
 }
 
-/**************************************************************/
-// Date: 15 Dec 2017
-// Function: LightController::handlePut
-// Description: TODO
-// Inputs: uint8_t*, uint8_t
-// Output: TODO
-// Return: fhdrint
-/**************************************************************/
-int LightController::handlePut(uint8_t* ptrPayload, uint8_t payloadSize)
+int LightController::write(uint8_t* ptrPayload, uint8_t payloadSize)
 {
-    int retVal = 0;
+    int retVal = BJ_SUCCESS;
     uint8_t cupId = 0;
     uint8_t numOfLeds = payloadSize / RGB_WS_LED_SIZE;
     uint8_t baseIdx = 0;
 
-    // Retreive the values from the buffer
     if(((payloadSize % RGB_WS_LED_SIZE) > 0) || (payloadSize == 0) || (ptrPayload == NULL))
     {
-#ifndef UNIT_TESTING
+#ifdef DEBUG
         BJBP_LOG_ERR("Payloadsize exceeds maximum LEDs or input is NULL");
 #endif
-        retVal = -1;
+        retVal = BJ_FAILURE;
     }
     else
     {
@@ -299,7 +188,6 @@ int LightController::handlePut(uint8_t* ptrPayload, uint8_t payloadSize)
         {
             baseIdx = RGB_WS_LED_SIZE * i;
 
-            // Get the RGB Reference
             // NOTE: Only 1 color is allowed per WS right now.
             cupId = ptrPayload[baseIdx];
 
@@ -316,20 +204,17 @@ int LightController::handlePut(uint8_t* ptrPayload, uint8_t payloadSize)
                     ptrWsLed->setRgbValues(ptrPayload[baseIdx + RGB_RED_BUF_POS], ptrPayload[baseIdx + RGB_GREEN_BUF_POS],
                             ptrPayload[baseIdx + RGB_BLUE_BUF_POS]);
 
-                    // Set the physical value of the neo pixel led
                     setNeoPixelLight(ptrWsLed, m_cupLights[cupId].getId());
                 }
             }
 
-            // DEBUG
-#ifndef UNIT_TESTING
-         /*   BJBP_LOG_INFO("Cup %u values R[%u] G[%u] B[%u] \n",
-                cupId, ptrPayload[(i * RGB_WS_LED_SIZE) + 1], ptrPayload[(i * RGB_WS_LED_SIZE) + 2],
-                ptrPayload[(RGB_WS_LED_SIZE) + 3]);*/
+#ifdef DEBUG
+            BJBP_LOG_INFO("Cup %u values R[%u] G[%u] B[%u] \n",
+                cupId, ptrPayload[baseIdx + RGB_RED_BUF_POS], ptrPayload[baseIdx + RGB_GREEN_BUF_POS],
+                ptrPayload[baseIdx + RGB_BLUE_BUF_POS]);
 #endif
         }
 
-        // Set the LED values on the output
 #ifndef UNIT_TESTING
         m_ptrNeoPixelStrip->show();
 #endif
@@ -338,18 +223,37 @@ int LightController::handlePut(uint8_t* ptrPayload, uint8_t payloadSize)
     return retVal;
 }
 
-/**************************************************************/
-// Date: 15 Dec 2017
-// Function: LightController::setNeoPixelLight
-// Description: TODO
-// Inputs: Ws2812Led*
-// Output: TODO
-// Return: void
-/**************************************************************/
+void LightController::runCupRemovedSequence(uint8_t cupId)
+{
+  Ws2812Led wsLed(0, 0, 0, 255);
+
+  for (int wsLedIdx = 0; wsLedIdx < LEDS_PER_CUP; wsLedIdx++) {
+      wsLed.setId(wsLedIdx);
+      setNeoPixelLight(&wsLed, cupId);
+      m_ptrNeoPixelStrip->show();
+      delay(50);
+  }
+
+  /*for (int cycle = 0; cycle < 2; cycle++) {
+    for (int ledIdx = 0; ledIdx < 3; ledIdx++) {
+        for (uint16_t pixelIdx = 0; pixelIdx < LEDS_PER_CUP; pixelIdx = pixelIdx + 3) {
+            m_ptrNeoPixelStrip->setPixelColor(startLedIdx + ledIdx, wheel( (startLedIdx + cycle) % 255));    //turn every third pixel on
+        }
+
+      m_ptrNeoPixelStrip->show();
+
+      delay(100);
+
+      for (uint16_t pixelIdx = 0; pixelIdx < m_ptrNeoPixelStrip->numPixels(); pixelIdx = pixelIdx + 3) {
+        m_ptrNeoPixelStrip->setPixelColor(startLedIdx + ledIdx, 0);
+      }
+    }
+  }*/
+}
+
 void LightController::setNeoPixelLight(Ws2812Led* wsLed, uint8_t cupId)
 {
     // Set the start ring buffer. This is seen as an array of lights starting from cup 0.
-    // Note: CupId of cups are starting from 1 why 1 must be substracted
     uint16_t wsLedStartIdx = (LEDS_PER_CUP * cupId) + wsLed->getId() ;
 
     // Set neo pixel lights
@@ -358,14 +262,6 @@ void LightController::setNeoPixelLight(Ws2812Led* wsLed, uint8_t cupId)
 #endif
 }
 
-/**************************************************************/
-// Date: 30 Dec 2017
-// Function: LightController::getSingleRgbVal
-// Description: TODO
-// Inputs: uint8_t*, uint8_t*
-// Output: TODO
-// Return: int16_t
-/**************************************************************/
 int16_t LightController::getSingleRgbVal(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
 {
     int16_t retVal = BJ_SUCCESS;
@@ -374,33 +270,23 @@ int16_t LightController::getSingleRgbVal(uint8_t* ptrBuffer, uint8_t* ptrBytesWr
     if(cupId > (NUM_OF_CUPS - 1))
     {
         retVal = BJ_FAILURE;
-#ifndef UNIT_TESTING
+#ifdef DEBUG
         BJBP_LOG_ERR("Invalid cup ID: %i\n", cupId);
 #endif
     }
     else
     {
-        // Set the RGB values starting from index 1.
         Ws2812Led* ptrWsLed = m_cupLights[cupId].getWsRef(0);
         ptrBuffer[RGB_RED_BUF_POS]   = ptrWsLed->getRedVal();
         ptrBuffer[RGB_GREEN_BUF_POS] = ptrWsLed->getGreenVal();
         ptrBuffer[RGB_BLUE_BUF_POS]  = ptrWsLed->getBlueVal();
 
-        // Set the bytes written to the size of all thre RGB values and the index
         *ptrBytesWritten = RGB_WS_LED_SIZE;
     }
 
     return retVal;
 }
 
-/**************************************************************/
-// Date: 30 Dec 2017
-// Function: LightController::getAllRgbVal
-// Description: TODO
-// Inputs: uint8_t*, uint8_t*
-// Output: TODO
-// Return: int16_t
-/**************************************************************/
 int16_t LightController::getAllRgbVal(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
 {
     int16_t retVal = BJ_SUCCESS;
@@ -409,24 +295,79 @@ int16_t LightController::getAllRgbVal(uint8_t* ptrBuffer, uint8_t* ptrBytesWritt
 
     for(int i = 0; i < NUM_OF_CUPS; i++)
     {
-        // Calculate the base index
         baseIdx = RGB_WS_LED_SIZE * i;
 
-        // Get the WS light ref. Individual setting is not yet supported.
+        // TODO: Get the WS light ref. Individual setting is not yet supported.
         ptrWsLed = m_cupLights[i].getWsRef(0);
 
-        // Set the buffer value
         ptrBuffer[baseIdx]                     = m_cupLights[i].getId();
         ptrBuffer[RGB_RED_BUF_POS + baseIdx]   = ptrWsLed->getRedVal();
         ptrBuffer[RGB_GREEN_BUF_POS + baseIdx] = ptrWsLed->getGreenVal();
         ptrBuffer[RGB_BLUE_BUF_POS + baseIdx]  = ptrWsLed->getBlueVal();
     }
 
-    // Set the bytes written to the size of all thre RGB values and the index
     *ptrBytesWritten = RGB_WS_LED_SIZE * NUM_OF_CUPS;
 
     return retVal;
 }
+
+void LightController::runLedTestProgram()
+{
+    setTestProgramColor(0, LED_RGB_MAX_VAL, 0);
+    setTestProgramColor(0, 0, LED_RGB_MAX_VAL);
+    setTestProgramColor(LED_RGB_MAX_VAL, LED_RGB_MAX_VAL, LED_RGB_MAX_VAL);
+
+    rainbowCycle(5, 500);
+    setTestProgramColor(0, LED_RGB_MAX_VAL, 0);
+}
+
+void LightController::setTestProgramColor(uint8_t redColor, uint8_t greenColor, uint8_t blueColor)
+{
+    for(unsigned int wsLedId = 0; wsLedId < LEDS_PER_CUP; wsLedId++)
+    {
+        for(unsigned int cupId = 0; cupId < NUM_OF_CUPS; cupId++)
+        {
+            Ws2812Led wsLed(wsLedId, redColor, greenColor, blueColor);
+            setNeoPixelLight(&wsLed, cupId);
+        }
+
+        m_ptrNeoPixelStrip->show();
+
+        delay(100);
+    }
+
+}
+
+
+// Slightly different, this makes the rainbow equally distributed throughout
+void LightController::rainbowCycle(uint8_t wait, uint16_t cycles) {
+  uint16_t i, j;
+
+  for(j = 0; j < cycles; j++) {
+    for(i = 0; i < m_ptrNeoPixelStrip->numPixels(); i++) {
+        m_ptrNeoPixelStrip->setPixelColor(i, wheel(((i * 256 / m_ptrNeoPixelStrip->numPixels()) + j) & 255));
+    }
+
+    m_ptrNeoPixelStrip->show();
+    delay(wait);
+  }
+}
+
+// Input a value 0 to 255 to get a color value.
+// The colours are a transition r - g - b - back to r.
+uint32_t LightController::wheel(byte WheelPos) {
+  WheelPos = 255 - WheelPos;
+  if(WheelPos < 85) {
+    return m_ptrNeoPixelStrip->Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  }
+  if(WheelPos < 170) {
+    WheelPos -= 85;
+    return m_ptrNeoPixelStrip->Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+  WheelPos -= 170;
+  return m_ptrNeoPixelStrip->Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+}
+
 
 };
 
