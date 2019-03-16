@@ -108,14 +108,18 @@ Ws2812Led* CupLight::getWsRef(uint8_t id)
 
 /** LightController **/
 
-LightController::LightController(uint8_t dataPin)
+LightController::LightController(uint8_t dataPin, uint8_t dataPinSecond)
 #ifndef UNIT_TESTING
-: m_ptrNeoPixelStrip(NULL)
+: m_ptrNeoPixelStrip(NULL),
+  m_ptrNeoPixelStripSecond(NULL)
 #endif
 {
 #ifndef UNIT_TESTING
-    m_ptrNeoPixelStrip = new Adafruit_NeoPixel((LEDS_PER_CUP * NUM_OF_CUPS), dataPin, NEO_GRB + NEO_KHZ800);
+    m_ptrNeoPixelStrip = new Adafruit_NeoPixel((LEDS_PER_CUP * NUM_OF_CUPS) / 2, dataPin, NEO_GRB + NEO_KHZ800);
+    m_ptrNeoPixelStripSecond = new Adafruit_NeoPixel((LEDS_PER_CUP * NUM_OF_CUPS) / 2, dataPinSecond, NEO_GRB + NEO_KHZ800);
+
     m_ptrNeoPixelStrip->begin();
+    m_ptrNeoPixelStripSecond->begin();
 #endif
 
     for(unsigned int i = 0; i < NUM_OF_CUPS; i++)
@@ -129,7 +133,7 @@ LightController::LightController(uint8_t dataPin)
     }
 
 #ifndef UNIT_TESTING
-    m_ptrNeoPixelStrip->show();
+    showNeoPixels();
 #endif
 }
 
@@ -216,7 +220,7 @@ int LightController::write(uint8_t* ptrPayload, uint8_t payloadSize)
         }
 
 #ifndef UNIT_TESTING
-        m_ptrNeoPixelStrip->show();
+        showNeoPixels();
 #endif
     }
 
@@ -230,25 +234,18 @@ void LightController::runCupRemovedSequence(uint8_t cupId)
   for (int wsLedIdx = 0; wsLedIdx < LEDS_PER_CUP; wsLedIdx++) {
       wsLed.setId(wsLedIdx);
       setNeoPixelLight(&wsLed, cupId);
-      m_ptrNeoPixelStrip->show();
-      delay(50);
+      showNeoPixels();
+      delay(16);
   }
 
-  /*for (int cycle = 0; cycle < 2; cycle++) {
-    for (int ledIdx = 0; ledIdx < 3; ledIdx++) {
-        for (uint16_t pixelIdx = 0; pixelIdx < LEDS_PER_CUP; pixelIdx = pixelIdx + 3) {
-            m_ptrNeoPixelStrip->setPixelColor(startLedIdx + ledIdx, wheel( (startLedIdx + cycle) % 255));    //turn every third pixel on
-        }
+  wsLed.setRgbValues(0, 255, 0);
 
-      m_ptrNeoPixelStrip->show();
-
-      delay(100);
-
-      for (uint16_t pixelIdx = 0; pixelIdx < m_ptrNeoPixelStrip->numPixels(); pixelIdx = pixelIdx + 3) {
-        m_ptrNeoPixelStrip->setPixelColor(startLedIdx + ledIdx, 0);
-      }
-    }
-  }*/
+  for (int wsLedIdx = LEDS_PER_CUP - 1; wsLedIdx >= 0; wsLedIdx--) {
+      wsLed.setId(wsLedIdx);
+      setNeoPixelLight(&wsLed, cupId);
+      showNeoPixels();
+      delay(16);
+  }
 }
 
 void LightController::setNeoPixelLight(Ws2812Led* wsLed, uint8_t cupId)
@@ -258,7 +255,11 @@ void LightController::setNeoPixelLight(Ws2812Led* wsLed, uint8_t cupId)
 
     // Set neo pixel lights
 #ifndef UNIT_TESTING
-    m_ptrNeoPixelStrip->setPixelColor(wsLedStartIdx, wsLed->getRedVal(), wsLed->getGreenVal(), wsLed->getBlueVal());
+    if(cupId > (NUM_OF_CUPS_EACH_SIDE - 1)) {
+        m_ptrNeoPixelStripSecond->setPixelColor(wsLedStartIdx, wsLed->getRedVal(), wsLed->getGreenVal(), wsLed->getBlueVal());
+    } else {
+        m_ptrNeoPixelStrip->setPixelColor(wsLedStartIdx, wsLed->getRedVal(), wsLed->getGreenVal(), wsLed->getBlueVal());
+    }
 #endif
 }
 
@@ -311,17 +312,184 @@ int16_t LightController::getAllRgbVal(uint8_t* ptrBuffer, uint8_t* ptrBytesWritt
     return retVal;
 }
 
-void LightController::runLedTestProgram()
-{
-    setTestProgramColor(0, LED_RGB_MAX_VAL, 0);
-    setTestProgramColor(0, 0, LED_RGB_MAX_VAL);
-    setTestProgramColor(LED_RGB_MAX_VAL, LED_RGB_MAX_VAL, LED_RGB_MAX_VAL);
-
-    rainbowCycle(5, 500);
-    setTestProgramColor(0, LED_RGB_MAX_VAL, 0);
+void LightController::showNeoPixels() {
+    m_ptrNeoPixelStrip->show();
+    m_ptrNeoPixelStripSecond->show();
 }
 
-void LightController::setTestProgramColor(uint8_t redColor, uint8_t greenColor, uint8_t blueColor)
+void LightController::setPixelColor(int index, uint32_t color) {
+    if(index > ((LEDS_PER_CUP * NUM_OF_CUPS) / 2) - 1) {
+        m_ptrNeoPixelStripSecond->setPixelColor(index, color);
+    } else {
+        m_ptrNeoPixelStrip->setPixelColor(index, color);
+    }
+}
+
+void LightController::runLedTestProgram()
+{
+    setTestProgramColor(50, LED_RGB_MAX_VAL, 0, 0);
+    setTestProgramColor(50, 0, 0, LED_RGB_MAX_VAL);
+    setTestProgramColor(50, 0, LED_RGB_MAX_VAL, 0);
+    setTestProgramColor(50, LED_RGB_MAX_VAL, LED_RGB_MAX_VAL, LED_RGB_MAX_VAL);
+    setTestProgramColor(50, 128, 0, 128); // Purple
+    setTestProgramColor(50, 255, 165, 0); // Orange
+    setTestProgramColor(50, 0, 128, 128); // Dunno
+
+    rainbowCycle(5, 500);
+    setTestProgramColor(50, 0, LED_RGB_MAX_VAL, 0);
+}
+
+void LightController::runIntroductionProgram()
+{
+    // Start setting all lights to very dimmed white
+    for(int cycles = 0; cycles <  255; cycles++) {
+        setAllCupsRingLights(cycles, cycles, cycles);
+        showNeoPixels();
+        delay(180);
+    }
+
+    // 48 seconds passed
+    rainbowCycle(5, 1000);
+
+    // 1 minute 10 seconds passed
+    // Turn on different collors
+    fadeRingPixelLightUp(3, true, false, true);
+    fadeRingPixelLightDown(3, true, false, true);
+
+    fadeRingPixelLightUp(3, false, true, true);
+    fadeRingPixelLightDown(3, false, true, true);
+
+
+    // 1 minute and 26 seconds
+    setTestProgramColor(50, 128, 0, 128); // Purple
+    setTestProgramColor(50, 255, 165, 0); // Orange
+    setTestProgramColor(50, 0, 128, 128); // Dunno
+    setTestProgramColor(50, 128, 0, 128); // Purple
+    setTestProgramColor(50, 1, 0, 255); // Orange
+    setTestProgramColor(50, 200, 50, 128); // Dunno
+    setTestProgramColor(50, 147, 112, 219); // Orange
+    setTestProgramColor(50, 154, 205, 50); // Orange
+    setTestProgramColor(50, 23, 255, 90); // Orange
+
+    setAllCupsRingLights(0, 0, 0);
+    showNeoPixels();
+
+
+    // 1 minute and 34 starts
+    // Run white led one at a time
+    for(int cupId = 0; cupId < NUM_OF_CUPS; cupId++)
+    {
+       if(cupId > 0) {
+           setNeoPixelRingLight(cupId - 1, 0, 0, 0);
+       } else if (cupId == 0) {
+           setNeoPixelRingLight(NUM_OF_CUPS - 1, 0, 0, 0);
+       }
+
+       setNeoPixelRingLight(cupId, 255, 255, 255);
+       showNeoPixels();
+       delay(100);
+    }
+
+    for(int cupId = NUM_OF_CUPS - 1; cupId > 0; cupId--)
+    {
+       if(cupId < NUM_OF_CUPS - 1) {
+           setNeoPixelRingLight(cupId + 1, 0, 0, 0);
+       }
+
+       setNeoPixelRingLight(cupId, 255, 255, 255);
+       showNeoPixels();
+       delay(100);
+    }
+
+
+    for(int cycles = 0; cycles < 3; cycles++)
+    {
+        uint8_t firstSideIdx = 0;
+        uint8_t lastSideIdx = NUM_OF_CUPS - 1;
+        setAllCupsRingLights(0, 0, 0);
+        showNeoPixels();
+        for(int cupId = 0; cupId < (NUM_OF_CUPS / 2); cupId++)
+        {
+           if(firstSideIdx > 0)
+           {
+               setNeoPixelRingLight(firstSideIdx - 1, 0, 0, 0);
+           } else if ((firstSideIdx == (NUM_OF_CUPS / 2) - 1)) {
+               setNeoPixelRingLight((NUM_OF_CUPS / 2) - 1, 0, 0, 0);
+           }
+
+           if(lastSideIdx < NUM_OF_CUPS - 1)
+           {
+               setNeoPixelRingLight(lastSideIdx + 1, 0, 0, 0);
+           } else if (lastSideIdx == (NUM_OF_CUPS - 1)) {
+               setNeoPixelRingLight((NUM_OF_CUPS / 2), 0, 0, 0);
+           }
+
+
+           setNeoPixelRingLight(firstSideIdx, 255, 255, 255);
+           setNeoPixelRingLight(lastSideIdx, 255, 255, 255);
+           showNeoPixels();
+           delay(100);
+           firstSideIdx++;
+           lastSideIdx--;
+       }
+    }
+
+    for(int cycles = 0; cycles <  255; cycles++)
+    {
+        setAllCupsRingLights(cycles, cycles, cycles);
+        showNeoPixels();
+        delay(20);
+    }
+
+
+   // Stops at 1 minute 48
+}
+
+void LightController::fadeRingPixelLightDown(uint16_t frequencyMs, bool redColor, bool greenColor, bool blueColor)
+{
+    for(int cycles = 255; cycles > 0 ; cycles --) {
+        setAllCupsRingLights(cycles * redColor, cycles * greenColor, cycles * blueColor);
+        delay(frequencyMs);
+        showNeoPixels();
+    }
+}
+
+void LightController::fadeRingPixelLightUp(uint16_t frequencyMs, bool redColor, bool greenColor, bool blueColor)
+{
+    for(int cycles = 0; cycles < 255; cycles ++) {
+        setAllCupsRingLights(cycles * redColor, cycles * greenColor, cycles * blueColor);
+        delay(frequencyMs);
+        showNeoPixels();
+    }
+}
+
+
+void LightController::setAllCupsRingLights(uint8_t redColor, uint8_t greenColor, uint8_t blueColor)
+{
+    for(int cupId = 0; cupId < NUM_OF_CUPS; cupId++)
+    {
+        setNeoPixelRingLight(cupId, redColor, greenColor, blueColor);
+    }
+}
+
+void LightController::blinkNeoPixelRingLight(uint8_t cupId, uint8_t redColor, uint8_t greenColor, uint8_t blueColor, uint16_t frequencyMs)
+{
+    setNeoPixelRingLight(cupId, redColor, greenColor, blueColor);
+    delay(frequencyMs);
+    setNeoPixelRingLight(cupId, 0, 0, 0);
+    delay(frequencyMs);
+}
+
+void LightController::setNeoPixelRingLight(uint8_t cupId, uint8_t redColor, uint8_t greenColor, uint8_t blueColor)
+{
+    for(unsigned int wsLedId = 0; wsLedId < LEDS_PER_CUP; wsLedId++)
+    {
+        Ws2812Led wsLed(wsLedId, redColor, greenColor, blueColor);
+        setNeoPixelLight(&wsLed, cupId);
+    }
+}
+
+void LightController::setTestProgramColor(uint16_t frequencyMs, uint8_t redColor, uint8_t greenColor, uint8_t blueColor)
 {
     for(unsigned int wsLedId = 0; wsLedId < LEDS_PER_CUP; wsLedId++)
     {
@@ -331,9 +499,9 @@ void LightController::setTestProgramColor(uint8_t redColor, uint8_t greenColor, 
             setNeoPixelLight(&wsLed, cupId);
         }
 
-        m_ptrNeoPixelStrip->show();
+        showNeoPixels();
 
-        delay(100);
+        delay(frequencyMs);
     }
 
 }
@@ -344,11 +512,12 @@ void LightController::rainbowCycle(uint8_t wait, uint16_t cycles) {
   uint16_t i, j;
 
   for(j = 0; j < cycles; j++) {
-    for(i = 0; i < m_ptrNeoPixelStrip->numPixels(); i++) {
-        m_ptrNeoPixelStrip->setPixelColor(i, wheel(((i * 256 / m_ptrNeoPixelStrip->numPixels()) + j) & 255));
+    for(i = 0; i < m_ptrNeoPixelStrip->numPixels() + m_ptrNeoPixelStripSecond->numPixels(); i++) {
+
+        setPixelColor(i, wheel(((i * 256 / (m_ptrNeoPixelStrip->numPixels() + m_ptrNeoPixelStripSecond->numPixels())) + j) & 255));
     }
 
-    m_ptrNeoPixelStrip->show();
+    showNeoPixels();
     delay(wait);
   }
 }

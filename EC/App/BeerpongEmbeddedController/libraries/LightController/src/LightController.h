@@ -111,24 +111,36 @@ private:
 class LightController : public IRestController
 {
 public:
-    LightController(uint8_t dataPin);
+    LightController(uint8_t dataPin, uint8_t dataPinSecond);
     virtual ~LightController();
 
     virtual int read(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten);
     virtual int write(uint8_t* ptrPayload, uint8_t payloadSize);
     void runCupRemovedSequence(uint8_t cupId);
     void runLedTestProgram();
+    void runIntroductionProgram();
 
 
 private:
-    void setTestProgramColor(uint8_t redColor, uint8_t greenColor, uint8_t blueColor);
+    /** Independent test settings */
+    void fadeRingPixelLightDown(uint16_t frequencyMs, bool redColor, bool greenColor, bool blueColor);
+    void fadeRingPixelLightUp(uint16_t frequencyMs, bool redColor, bool greenColor, bool blueColor);
+    void setAllCupsRingLights(uint8_t redColor, uint8_t greenColor, uint8_t blueColor);
+    void setNeoPixelRingLight(uint8_t cupId, uint8_t redColor, uint8_t greenColor, uint8_t blueColor);
+    void blinkNeoPixelRingLight(uint8_t cupId, uint8_t redColor, uint8_t greenColor, uint8_t blueColor, uint16_t frequencyMs);
+
+    void setTestProgramColor(uint16_t frequencyMs, uint8_t redColor, uint8_t greenColor, uint8_t blueColor);
     void setNeoPixelLight(Ws2812Led* wsLed, uint8_t cupId);
     void rainbowCycle(uint8_t wait, uint16_t cycles);
     uint32_t wheel(byte WheelPos);
     int16_t getSingleRgbVal(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten);
     int16_t getAllRgbVal(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten);
+
+    void showNeoPixels();
+    void setPixelColor(int index, uint32_t color);
 #ifndef UNIT_TESTING
     Adafruit_NeoPixel* m_ptrNeoPixelStrip;
+    Adafruit_NeoPixel* m_ptrNeoPixelStripSecond;
 #endif
     CupLight m_cupLights[NUM_OF_CUPS];
 };

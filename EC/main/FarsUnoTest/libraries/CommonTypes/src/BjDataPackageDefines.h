@@ -16,7 +16,7 @@ namespace BjDataPackageDefines
 //-------------------------------------------------------------------------------//
 // DEFINES
 //-------------------------------------------------------------------------------//
-const uint8_t PACKAGE_HEADER_SIZE     = 13;
+const uint8_t PACKAGE_HEADER_SIZE     = 9;
 const uint16_t MAX_PAYLOAD_SIZE       = 255;
 const uint16_t MAX_PACKAGE_SIZE       = (uint16_t) PACKAGE_HEADER_SIZE + (uint16_t) MAX_PAYLOAD_SIZE; // 8 bit + the additional fields in the protocol
 const uint8_t PING_PAYLOAD_SIZE       = 1;

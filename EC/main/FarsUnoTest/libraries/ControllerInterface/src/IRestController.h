@@ -15,8 +15,6 @@ class IRestController
 public:
     virtual int read(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten) = 0;
     virtual int write(uint8_t* ptrPayload, uint8_t payloadSize) = 0;
-    virtual int handlePost(uint8_t* ptrPayload, uint8_t payloadSize) = 0;
-    virtual int handleDelete(uint8_t* ptrPayload, uint8_t payloadSize) = 0;
 };
 
 #endif /* LIBRARIES_CONTROLLERINTERFACE_SRC_IRESTCONTROLLER_H_ */

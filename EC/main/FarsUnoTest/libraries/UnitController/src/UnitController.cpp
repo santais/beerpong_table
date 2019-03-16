@@ -179,6 +179,8 @@ bool UnitController::sendPkgContentToController(BjDataPackage& bjDataPkg)
     IRestController* ptrRestCtrl = NULL;
     uint8_t bytesWritten = 0;
 
+    BJBP_LOG_INFO("Target module is: %i\n", bjDataPkg.getTargetModule());
+
     ptrRestCtrl = getRestCtrlRef(bjDataPkg.getTargetModule());
 
     // check what REST command that was instantiated
@@ -200,7 +202,7 @@ bool UnitController::sendPkgContentToController(BjDataPackage& bjDataPkg)
             }
             break;
         case RestRequest::E_PUT_REQUEST:
-            ptrRestCtrl->handlePut(bjDataPkg.getPayload(NULL), bjDataPkg.getPayloadSize());
+            ptrRestCtrl->write(bjDataPkg.getPayload(NULL), bjDataPkg.getPayloadSize());
             break;
         default:
 #ifndef UNIT_TESTING
@@ -262,8 +264,6 @@ bool UnitController::checkInputData()
     if(dataBytesRead > 0)
     {
 #endif
-      //  BJBP_LOG_INFO("Read %i number of bytes \n", dataBytesRead);
-
         BjDataPackage bjDataPackage;
         bjDataPackage.setPkgFromRawPayload(&m_tmpPkgBuffer[0], dataBytesRead);
 

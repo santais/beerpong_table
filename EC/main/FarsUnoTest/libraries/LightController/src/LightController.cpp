@@ -246,7 +246,7 @@ int LightController::read(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
 
     if((ptrBuffer == NULL) || (ptrBytesWritten == NULL))
     {
-#ifndef UNIT_TESTING
+#ifdef DEBUG
         BJBP_LOG_ERR("Invalid input buffer or bytes written\n");
 #endif
         retVal = BJ_FAILURE;
@@ -278,7 +278,7 @@ int LightController::read(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten)
 // Output: TODO
 // Return: fhdrint
 /**************************************************************/
-int LightController::handlePut(uint8_t* ptrPayload, uint8_t payloadSize)
+int LightController::write(uint8_t* ptrPayload, uint8_t payloadSize)
 {
     int retVal = BJ_SUCCESS;
     uint8_t cupId = 0;
@@ -290,7 +290,7 @@ int LightController::handlePut(uint8_t* ptrPayload, uint8_t payloadSize)
     // Retreive the values from the buffer
     if(((payloadSize % RGB_WS_LED_SIZE) > 0) || (payloadSize == 0) || (ptrPayload == NULL))
     {
-#ifndef UNIT_TESTING
+#ifdef DEBUG
         BJBP_LOG_ERR("Payloadsize exceeds maximum LEDs or input is NULL");
 #endif
         retVal = BJ_FAILURE;
@@ -324,7 +324,7 @@ int LightController::handlePut(uint8_t* ptrPayload, uint8_t payloadSize)
             }
 
             // DEBUG
-#ifndef UNIT_TESTING
+#ifdef DEBUG
             BJBP_LOG_INFO("Cup %u values R[%u] G[%u] B[%u] \n",
                 cupId, ptrPayload[baseIdx + RGB_RED_BUF_POS], ptrPayload[baseIdx + RGB_GREEN_BUF_POS],
                 ptrPayload[baseIdx + RGB_BLUE_BUF_POS]);
@@ -376,7 +376,7 @@ int16_t LightController::getSingleRgbVal(uint8_t* ptrBuffer, uint8_t* ptrBytesWr
     if(cupId > (NUM_OF_CUPS - 1))
     {
         retVal = BJ_FAILURE;
-#ifndef UNIT_TESTING
+#ifdef DEBUG
         BJBP_LOG_ERR("Invalid cup ID: %i\n", cupId);
 #endif
     }

@@ -61,6 +61,7 @@ bool BjDataPackage::setPkgFromRawPayload(uint8_t* payload, uint16_t payloadSize)
     // Validate the payload size
     if((payload != NULL) && (payloadSize >= (PACKAGE_HEADER_SIZE)))
     {
+
         retVal = true;
 
         // Set the checksum
