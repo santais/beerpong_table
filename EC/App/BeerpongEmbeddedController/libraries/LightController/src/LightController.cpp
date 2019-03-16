@@ -114,7 +114,7 @@ LightController::LightController(uint8_t dataPin)
 #endif
 {
 #ifndef UNIT_TESTING
-    m_ptrNeoPixelStrip = new Adafruit_NeoPixel(LEDS_PER_CUP * NUM_OF_CUPS, dataPin, NEO_GRB + NEO_KHZ800);
+    m_ptrNeoPixelStrip = new Adafruit_NeoPixel((LEDS_PER_CUP * NUM_OF_CUPS), dataPin, NEO_GRB + NEO_KHZ800);
 
     m_ptrNeoPixelStrip->begin();
 #endif
@@ -330,14 +330,14 @@ void LightController::runLedTestProgram()
 void LightController::runIntroductionProgram()
 {
     // Start setting all lights to very dimmed white
-    for(int cycles = 0; cycles <  255; cycles++) {
+    /*for(int cycles = 0; cycles <  255; cycles++) {
         setAllCupsRingLights(cycles, cycles, cycles);
         showNeoPixels();
         delay(180);
-    }
+    }*/
 
     // 48 seconds passed
-    rainbowCycle(5, 1000);
+    rainbowCycle(5, 5000); // 5 , 1000
 
     // 1 minute 10 seconds passed
     // Turn on different collors
@@ -396,6 +396,7 @@ void LightController::runIntroductionProgram()
         uint8_t lastSideIdx = NUM_OF_CUPS - 1;
         setAllCupsRingLights(0, 0, 0);
         showNeoPixels();
+
         for(int cupId = 0; cupId < (NUM_OF_CUPS / 2); cupId++)
         {
            if(firstSideIdx > 0)

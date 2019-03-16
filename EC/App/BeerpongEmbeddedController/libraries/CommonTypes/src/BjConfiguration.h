@@ -42,7 +42,6 @@ const uint8_t SN74HC165_QH_PIN          = 11;
 //---------------------------------------------------------------------------------------------------
 const uint8_t NUM_OF_CUPS  = 20u;
 const uint8_t LEDS_PER_CUP = 16u;
-const uint8_t NUM_OF_CUPS_EACH_SIDE = NUM_OF_CUPS / 2;
 const uint8_t SHIFT_REG_REQUIRED = ceil((double) NUM_OF_CUPS / BITS_PER_SHIFT_REG);
 const uint8_t SENSOR_READINGS_REQUIRED  = SHIFT_REG_REQUIRED * BITS_PER_SHIFT_REG;
 
