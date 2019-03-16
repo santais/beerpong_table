@@ -111,7 +111,7 @@ private:
 class LightController : public IRestController
 {
 public:
-    LightController(uint8_t dataPin, uint8_t dataPinSecond);
+    LightController(uint8_t dataPin);
     virtual ~LightController();
 
     virtual int read(uint8_t* ptrBuffer, uint8_t* ptrBytesWritten);
@@ -140,7 +140,6 @@ private:
     void setPixelColor(int index, uint32_t color);
 #ifndef UNIT_TESTING
     Adafruit_NeoPixel* m_ptrNeoPixelStrip;
-    Adafruit_NeoPixel* m_ptrNeoPixelStripSecond;
 #endif
     CupLight m_cupLights[NUM_OF_CUPS];
 };

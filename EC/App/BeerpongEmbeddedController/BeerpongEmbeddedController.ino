@@ -104,7 +104,7 @@ void setup()
     Serial.begin(115200);
 
     // Setup the controllers
-    ptrLightCtrl = new LightController(WS2812_DATA_PIN_O, WS2812_DATA_PIN_O_SECOND);
+    ptrLightCtrl = new LightController(WS2812_DATA_PIN_O);
     ptrEdgeLightCtrl = new EdgeLightController(I2C_PWM_MOD_ADDR, I2C_PWM_FREQ_HZ);
     ptrSystemCtrl = new SystemController();
     ptrSensorCtrl = new SensorController(SN74HC165_CLK_PIN_O, SN74HC165_CLK_INH_PIN_O, SN74HC165_SDLD_PIN_O, SN74HC165_QH_PIN   );

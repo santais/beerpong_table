@@ -108,18 +108,15 @@ Ws2812Led* CupLight::getWsRef(uint8_t id)
 
 /** LightController **/
 
-LightController::LightController(uint8_t dataPin, uint8_t dataPinSecond)
+LightController::LightController(uint8_t dataPin)
 #ifndef UNIT_TESTING
-: m_ptrNeoPixelStrip(NULL),
-  m_ptrNeoPixelStripSecond(NULL)
+: m_ptrNeoPixelStrip(NULL)
 #endif
 {
 #ifndef UNIT_TESTING
-    m_ptrNeoPixelStrip = new Adafruit_NeoPixel((LEDS_PER_CUP * NUM_OF_CUPS) / 2, dataPin, NEO_GRB + NEO_KHZ800);
-    m_ptrNeoPixelStripSecond = new Adafruit_NeoPixel((LEDS_PER_CUP * NUM_OF_CUPS) / 2, dataPinSecond, NEO_GRB + NEO_KHZ800);
+    m_ptrNeoPixelStrip = new Adafruit_NeoPixel(LEDS_PER_CUP * NUM_OF_CUPS, dataPin, NEO_GRB + NEO_KHZ800);
 
     m_ptrNeoPixelStrip->begin();
-    m_ptrNeoPixelStripSecond->begin();
 #endif
 
     for(unsigned int i = 0; i < NUM_OF_CUPS; i++)
@@ -255,11 +252,7 @@ void LightController::setNeoPixelLight(Ws2812Led* wsLed, uint8_t cupId)
 
     // Set neo pixel lights
 #ifndef UNIT_TESTING
-    if(cupId > (NUM_OF_CUPS_EACH_SIDE - 1)) {
-        m_ptrNeoPixelStripSecond->setPixelColor(wsLedStartIdx, wsLed->getRedVal(), wsLed->getGreenVal(), wsLed->getBlueVal());
-    } else {
-        m_ptrNeoPixelStrip->setPixelColor(wsLedStartIdx, wsLed->getRedVal(), wsLed->getGreenVal(), wsLed->getBlueVal());
-    }
+   m_ptrNeoPixelStrip->setPixelColor(wsLedStartIdx, wsLed->getRedVal(), wsLed->getGreenVal(), wsLed->getBlueVal());
 #endif
 }
 
@@ -314,15 +307,10 @@ int16_t LightController::getAllRgbVal(uint8_t* ptrBuffer, uint8_t* ptrBytesWritt
 
 void LightController::showNeoPixels() {
     m_ptrNeoPixelStrip->show();
-    m_ptrNeoPixelStripSecond->show();
 }
 
 void LightController::setPixelColor(int index, uint32_t color) {
-    if(index > ((LEDS_PER_CUP * NUM_OF_CUPS) / 2) - 1) {
-        m_ptrNeoPixelStripSecond->setPixelColor(index, color);
-    } else {
-        m_ptrNeoPixelStrip->setPixelColor(index, color);
-    }
+    m_ptrNeoPixelStrip->setPixelColor(index, color);
 }
 
 void LightController::runLedTestProgram()
@@ -512,9 +500,9 @@ void LightController::rainbowCycle(uint8_t wait, uint16_t cycles) {
   uint16_t i, j;
 
   for(j = 0; j < cycles; j++) {
-    for(i = 0; i < m_ptrNeoPixelStrip->numPixels() + m_ptrNeoPixelStripSecond->numPixels(); i++) {
+    for(i = 0; i < m_ptrNeoPixelStrip->numPixels(); i++) {
 
-        setPixelColor(i, wheel(((i * 256 / (m_ptrNeoPixelStrip->numPixels() + m_ptrNeoPixelStripSecond->numPixels())) + j) & 255));
+        setPixelColor(i, wheel(((i * 256 / (m_ptrNeoPixelStrip->numPixels())) + j) & 255));
     }
 
     showNeoPixels();

@@ -49,7 +49,6 @@ const uint8_t SENSOR_READINGS_REQUIRED  = SHIFT_REG_REQUIRED * BITS_PER_SHIFT_RE
 
 // WS2812 Data Pin
 const uint8_t WS2812_DATA_PIN_O = 6;
-const uint8_t WS2812_DATA_PIN_O_SECOND = 7;
 //---------------------------------------------------------------------------------------------------
 // UART INTERFACE
 //---------------------------------------------------------------------------------------------------
