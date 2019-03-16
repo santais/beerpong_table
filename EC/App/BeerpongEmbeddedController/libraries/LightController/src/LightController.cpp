@@ -330,14 +330,14 @@ void LightController::runLedTestProgram()
 void LightController::runIntroductionProgram()
 {
     // Start setting all lights to very dimmed white
-    /*for(int cycles = 0; cycles <  255; cycles++) {
+    for(int cycles = 0; cycles <  255; cycles++) {
         setAllCupsRingLights(cycles, cycles, cycles);
         showNeoPixels();
         delay(180);
-    }*/
+    }
 
     // 48 seconds passed
-    rainbowCycle(5, 5000); // 5 , 1000
+    rainbowCycle(5, 1000); // 5 , 1000
 
     // 1 minute 10 seconds passed
     // Turn on different collors
